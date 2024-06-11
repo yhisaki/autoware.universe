@@ -301,7 +301,17 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/autoware_operation_mode_transition_manager/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/autoware_pid_longitudinal_controller/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/autoware_shift_decider/</loc>
          <lastmod>2024-06-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -312,6 +322,16 @@
     </url>
     <url>
          <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/autoware_trajectory_follower_base/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/autoware_trajectory_follower_node/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/autoware_trajectory_follower_node/design/simple_trajectory_follower-design/</loc>
          <lastmod>2024-06-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -331,32 +351,12 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/operation_mode_transition_manager/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/predicted_path_checker/</loc>
          <lastmod>2024-06-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/pure_pursuit/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/shift_decider/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/trajectory_follower_node/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/control/trajectory_follower_node/design/simple_trajectory_follower-design/</loc>
          <lastmod>2024-06-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -901,6 +901,26 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_behavior_path_planner/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_behavior_path_planner/docs/behavior_path_planner_interface_design/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_behavior_path_planner/docs/behavior_path_planner_limitations/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_behavior_path_planner/docs/behavior_path_planner_manager_design/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_behavior_path_planner_common/docs/behavior_path_planner_drivable_area_design/</loc>
          <lastmod>2024-06-11</lastmod>
          <changefreq>daily</changefreq>
@@ -946,7 +966,17 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_behavior_velocity_crosswalk_module/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_behavior_velocity_intersection_module/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_behavior_velocity_no_stopping_area_module/</loc>
          <lastmod>2024-06-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -1027,6 +1057,16 @@
     </url>
     <url>
          <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_objects_of_interest_marker_interface/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_obstacle_cruise_planner/</loc>
+         <lastmod>2024-06-11</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/autoware_obstacle_cruise_planner/docs/debug/</loc>
          <lastmod>2024-06-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
@@ -1116,31 +1156,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/behavior_path_planner/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/behavior_path_planner/docs/behavior_path_planner_interface_design/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/behavior_path_planner/docs/behavior_path_planner_limitations/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/behavior_path_planner/docs/behavior_path_planner_manager_design/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/behavior_velocity_crosswalk_module/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/behavior_velocity_detection_area_module/</loc>
          <lastmod>2024-06-11</lastmod>
          <changefreq>daily</changefreq>
@@ -1156,11 +1171,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/behavior_velocity_no_stopping_area_module/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/behavior_velocity_speed_bump_module/</loc>
          <lastmod>2024-06-11</lastmod>
          <changefreq>daily</changefreq>
@@ -1172,16 +1182,6 @@
     </url>
     <url>
          <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/motion_velocity_planner/autoware_motion_velocity_planner_node/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/obstacle_cruise_planner/</loc>
-         <lastmod>2024-06-11</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://autowarefoundation.github.io/autoware.universe/latest/planning/obstacle_cruise_planner/docs/debug/</loc>
          <lastmod>2024-06-11</lastmod>
          <changefreq>daily</changefreq>
     </url>
