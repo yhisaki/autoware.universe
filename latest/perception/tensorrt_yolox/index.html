@@ -8154,7 +8154,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../planning/behavior_velocity_planner/behavior_velocity_speed_bump_module" class="md-nav__link">
+      <a href="../../planning/behavior_velocity_planner/autoware_behavior_velocity_speed_bump_module" class="md-nav__link">
         Speed Bump
       </a>
     </li>
@@ -13161,10 +13161,10 @@
 
 <div><h1 id="tensorrt_yolox">tensorrt_yolox<a class="headerlink" href="#tensorrt_yolox" title="Permanent link">#</a></h1>
 <h2 id="purpose">Purpose<a class="headerlink" href="#purpose" title="Permanent link">#</a></h2>
-<p>This package detects target objects e.g., cars, trucks, bicycles, and pedestrians on a image based on <a href="https://github.com/Megvii-BaseDetection/YOLOX">YOLOX</a> model.</p>
+<p>This package detects target objects e.g., cars, trucks, bicycles, and pedestrians and segment target objects such as cars, trucks, buses and pedestrian, building, vegetation, road, sidewalk on a image based on <a href="https://github.com/Megvii-BaseDetection/YOLOX">YOLOX</a> model with multi-header structure.</p>
 <h2 id="inner-workings-algorithms">Inner-workings / Algorithms<a class="headerlink" href="#inner-workings-algorithms" title="Permanent link">#</a></h2>
 <h3 id="cite">Cite<a class="headerlink" href="#cite" title="Permanent link">#</a></h3>
-<!-- cspell: ignore Zheng, Songtao, Feng, Zeming, Jian -->
+<!-- cspell: ignore Zheng, Songtao, Feng, Zeming, Jian, semseg -->
 
 <p>Zheng Ge, Songtao Liu, Feng Wang, Zeming Li, Jian Sun, "YOLOX: Exceeding YOLO Series in 2021", arXiv preprint arXiv:2107.08430, 2021 [<a href="https://arxiv.org/abs/2107.08430">ref</a>]</p>
 <h2 id="inputs-outputs">Inputs / Outputs<a class="headerlink" href="#inputs-outputs" title="Permanent link">#</a></h2>
@@ -13204,6 +13204,16 @@
 <td><code>out/image</code></td>
 <td><code>sensor_msgs/Image</code></td>
 <td>The image with 2D bounding boxes for visualization</td>
+</tr>
+<tr>
+<td><code>out/mask</code></td>
+<td><code>sensor_msgs/Image</code></td>
+<td>The semantic segmentation mask</td>
+</tr>
+<tr>
+<td><code>out/color_mask</code></td>
+<td><code>sensor_msgs/Image</code></td>
+<td>The colorized image of semantic segmentation mask for visualization</td>
 </tr>
 </tbody>
 </table>
@@ -13250,6 +13260,12 @@
 <td>string</td>
 <td>""</td>
 <td>The onnx file name for yolox model</td>
+</tr>
+<tr>
+<td><code>model_name</code></td>
+<td>string</td>
+<td>""</td>
+<td>The yolox model name: <br> "yolox-sPlus-T4-960x960-pseudo-finetune" for detection only, could reduce resource and processing_time <br> "yolox-sPlus-opt-pseudoV2-T4-960x960-T4-seg16cls" for multi-task including semantic segmentation</td>
 </tr>
 <tr>
 <td><code>label_path</code></td>
@@ -13317,6 +13333,78 @@
 <td>""</td>
 <td>Path to a file which contains path to images. Those images will be used for int8 quantization.</td>
 </tr>
+<tr>
+<td><code>yolox_s_plus_opt_param_path</code></td>
+<td>string</td>
+<td>""</td>
+<td>Path to parameter file</td>
+</tr>
+<tr>
+<td><code>is_publish_color_mask</code></td>
+<td>bool</td>
+<td>false</td>
+<td>If true, publish color mask for result visualization</td>
+</tr>
+<tr>
+<td><code>is_roi_overlap_segment</code></td>
+<td>bool</td>
+<td>true</td>
+<td>If true, overlay detected object roi onto semantic segmentation to avoid over-filtering pointcloud especially small size objects</td>
+</tr>
+<tr>
+<td><code>overlap_roi_score_threshold</code></td>
+<td>float</td>
+<td>0.3</td>
+<td>minimum existence_probability of detected roi considered to replace segmentation</td>
+</tr>
+<tr>
+<td><code>roi_overlay_segment_label.UNKNOWN</code></td>
+<td>bool</td>
+<td>true</td>
+<td>If true, unknown objects roi will be overlaid onto sematic segmentation mask.</td>
+</tr>
+<tr>
+<td><code>roi_overlay_segment_label.CAR</code></td>
+<td>bool</td>
+<td>false</td>
+<td>If true, car objects roi will be overlaid onto sematic segmentation mask.</td>
+</tr>
+<tr>
+<td><code>roi_overlay_segment_label.TRUCK</code></td>
+<td>bool</td>
+<td>false</td>
+<td>If true, truck objects roi will be overlaid onto sematic segmentation mask.</td>
+</tr>
+<tr>
+<td><code>roi_overlay_segment_label.BUS</code></td>
+<td>bool</td>
+<td>false</td>
+<td>If true, bus objects roi will be overlaid onto sematic segmentation mask.</td>
+</tr>
+<tr>
+<td><code>roi_overlay_segment_label.MOTORCYCLE</code></td>
+<td>bool</td>
+<td>true</td>
+<td>If true, motorcycle objects roi will be overlaid onto sematic segmentation mask.</td>
+</tr>
+<tr>
+<td><code>roi_overlay_segment_label.BICYCLE</code></td>
+<td>bool</td>
+<td>true</td>
+<td>If true, bicycle objects roi will be overlaid onto sematic segmentation mask.</td>
+</tr>
+<tr>
+<td><code>roi_overlay_segment_label.PEDESTRIAN</code></td>
+<td>bool</td>
+<td>true</td>
+<td>If true, pedestrian objects roi will be overlaid onto sematic segmentation mask.</td>
+</tr>
+<tr>
+<td><code>roi_overlay_segment_label.ANIMAL</code></td>
+<td>bool</td>
+<td>true</td>
+<td>If true, animal objects roi will be overlaid onto sematic segmentation mask.</td>
+</tr>
 </tbody>
 </table>
 <h2 id="assumptions-known-limits">Assumptions / Known limits<a class="headerlink" href="#assumptions-known-limits" title="Permanent link">#</a></h2>
@@ -13331,6 +13419,81 @@
 </ul>
 <p>If other labels (case insensitive) are contained in the file specified via the <code>label_file</code> parameter,
 those are labeled as <code>UNKNOWN</code>, while detected rectangles are drawn in the visualization result (<code>out/image</code>).</p>
+<p>The semantic segmentation mask is a gray image whose each pixel is index of one following class:</p>
+<table>
+<thead>
+<tr>
+<th>index</th>
+<th>semantic name</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>road</td>
+</tr>
+<tr>
+<td>1</td>
+<td>building</td>
+</tr>
+<tr>
+<td>2</td>
+<td>wall</td>
+</tr>
+<tr>
+<td>3</td>
+<td>obstacle</td>
+</tr>
+<tr>
+<td>4</td>
+<td>traffic_light</td>
+</tr>
+<tr>
+<td>5</td>
+<td>traffic_sign</td>
+</tr>
+<tr>
+<td>6</td>
+<td>person</td>
+</tr>
+<tr>
+<td>7</td>
+<td>vehicle</td>
+</tr>
+<tr>
+<td>8</td>
+<td>bike</td>
+</tr>
+<tr>
+<td>9</td>
+<td>road</td>
+</tr>
+<tr>
+<td>10</td>
+<td>sidewalk</td>
+</tr>
+<tr>
+<td>11</td>
+<td>roadPaint</td>
+</tr>
+<tr>
+<td>12</td>
+<td>curbstone</td>
+</tr>
+<tr>
+<td>13</td>
+<td>crosswalk_others</td>
+</tr>
+<tr>
+<td>14</td>
+<td>vegetation</td>
+</tr>
+<tr>
+<td>15</td>
+<td>sky</td>
+</tr>
+</tbody>
+</table>
 <h2 id="onnx-model">Onnx model<a class="headerlink" href="#onnx-model" title="Permanent link">#</a></h2>
 <p>A sample model (named <code>yolox-tiny.onnx</code>) is downloaded by ansible script on env preparation stage, if not, please, follow <a href="https://github.com/autowarefoundation/autoware/tree/main/ansible/roles/artifacts">Manual downloading of artifacts</a>.
 To accelerate Non-maximum-suppression (NMS), which is one of the common post-process after object detection inference,
@@ -13338,11 +13501,12 @@ To accelerate Non-maximum-suppression (NMS), which is one of the common post-pro
 The <code>EfficientNMS_TRT</code> module contains fixed values for <code>score_threshold</code> and <code>nms_threshold</code> in it,
 hence these parameters are ignored when users specify ONNX models including this module.</p>
 <p>This package accepts both <code>EfficientNMS_TRT</code> attached ONNXs and <a href="https://github.com/Megvii-BaseDetection/YOLOX/tree/main/demo/ONNXRuntime#download-onnx-models">models published from the official YOLOX repository</a> (we referred to them as "plain" models).</p>
-<p>In addition to <code>yolox-tiny.onnx</code>, a custom model named <code>yolox-sPlus-opt.onnx</code> is either available.
-This model is based on YOLOX-s and tuned to perform more accurate detection with almost comparable execution speed with <code>yolox-tiny</code>.
+<p>In addition to <code>yolox-tiny.onnx</code>, a custom model named <code>yolox-sPlus-opt-pseudoV2-T4-960x960-T4-seg16cls</code> is either available.
+This model is multi-header structure model which is based on YOLOX-s and tuned to perform more accurate detection with almost comparable execution speed with <code>yolox-tiny</code>.
 To get better results with this model, users are recommended to use some specific running arguments
 such as <code>precision:=int8</code>, <code>calibration_algorithm:=Entropy</code>, <code>clip_value:=6.0</code>.
-Users can refer <code>launch/yolox_sPlus_opt.launch.xml</code> to see how this model can be used.</p>
+Users can refer <code>launch/yolox_sPlus_opt.launch.xml</code> to see how this model can be used.
+Beside detection result, this model also output image semantic segmentation result for pointcloud filtering purpose.</p>
 <p>All models are automatically converted to TensorRT format.
 These converted files will be saved in the same directory as specified ONNX files
 with <code>.engine</code> filename extension and reused from the next run.
@@ -13397,7 +13561,7 @@ pip3<span class="w"> </span>install<span class="w"> </span>git+ssh://git@github.
 </li>
 </ol>
 <h2 id="label-file">Label file<a class="headerlink" href="#label-file" title="Permanent link">#</a></h2>
-<p>A sample label file (named <code>label.txt</code>)is also downloaded automatically during env preparation process
+<p>A sample label file (named <code>label.txt</code>) and semantic segmentation color map file (name <code>semseg_color_map.csv</code>) are also downloaded automatically during env preparation process
 (<strong>NOTE:</strong> This file is incompatible with models that output labels for the COCO dataset (e.g., models from the official YOLOX repository)).</p>
 <p>This file represents the correspondence between class index (integer outputted from YOLOX network) and
 class label (strings making understanding easier). This package maps class IDs (incremented from 0)
@@ -13406,6 +13570,7 @@ with labels according to the order in this file.</p>
 <ul>
 <li><a href="https://github.com/Megvii-BaseDetection/YOLOX">https://github.com/Megvii-BaseDetection/YOLOX</a></li>
 <li><a href="https://github.com/wep21/yolox_onnx_modifier">https://github.com/wep21/yolox_onnx_modifier</a></li>
+<li><a href="https://github.com/tier4/trt-yoloXP">https://github.com/tier4/trt-yoloXP</a></li>
 </ul></div>
 
 
