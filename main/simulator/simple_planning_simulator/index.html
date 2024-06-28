@@ -9231,8 +9231,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_8_10" id="__nav_8_10_label" tabindex="0">
@@ -9266,20 +9264,6 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../planning/rtc_replayer" class="md-nav__link">
-        RTC Replayer
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
     
     <li class="md-nav__item md-nav__item--nested">
       
@@ -9288,7 +9272,7 @@
       
         
       
-      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_10_3" >
+      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_10_2" >
       
       
         
@@ -9298,13 +9282,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_8_10_3" id="__nav_8_10_3_label" tabindex="0">
+        <label class="md-nav__link" for="__nav_8_10_2" id="__nav_8_10_2_label" tabindex="0">
           Planning Debug Tools
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_10_3_label" aria-expanded="false">
-        <label class="md-nav__title" for="__nav_8_10_3">
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_10_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_8_10_2">
           <span class="md-nav__icon md-icon"></span>
           Planning Debug Tools
         </label>
@@ -13270,6 +13254,7 @@
 <li><code>DELAY_STEER_VEL</code></li>
 <li><code>DELAY_STEER_ACC</code></li>
 <li><code>DELAY_STEER_ACC_GEARED</code></li>
+<li><code>DELAY_STEER_ACC_GEARED_WO_FALL_GUARD</code></li>
 <li><code>DELAY_STEER_MAP_ACC_GEARED</code>: applies 1D dynamics and time delay to the steering and acceleration commands. The simulated acceleration is determined by a value converted through the provided acceleration map. This model is valuable for an accurate simulation with acceleration deviations in a real vehicle.</li>
 <li><code>LEARNED_STEER_VEL</code>: launches learned python models. More about this <a href="../learning_based_vehicle_model">here</a>.</li>
 </ul>
@@ -13287,6 +13272,7 @@
 <th align="left">D_ST_V</th>
 <th align="left">D_ST_A</th>
 <th align="left">D_ST_A_G</th>
+<th align="left">D_ST_A_G_WO_FG</th>
 <th align="left">D_ST_M_ACC_G</th>
 <th align="left">L_S_V</th>
 <th align="left">Default value</th>
@@ -13305,6 +13291,7 @@
 <td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
+<td align="left">o</td>
 <td align="left">x</td>
 <td align="left">0.1</td>
 <td align="left">[s]</td>
@@ -13316,6 +13303,7 @@
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
+<td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
@@ -13336,6 +13324,7 @@
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
+<td align="left">x</td>
 <td align="left">0.25</td>
 <td align="left">[s]</td>
 </tr>
@@ -13347,6 +13336,7 @@
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
+<td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
@@ -13365,6 +13355,7 @@
 <td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
+<td align="left">o</td>
 <td align="left">x</td>
 <td align="left">0.27</td>
 <td align="left">[s]</td>
@@ -13376,6 +13367,7 @@
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
+<td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
@@ -13396,6 +13388,7 @@
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
+<td align="left">x</td>
 <td align="left">0.5</td>
 <td align="left">[s]</td>
 </tr>
@@ -13406,6 +13399,7 @@
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
+<td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
@@ -13425,6 +13419,7 @@
 <td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
+<td align="left">o</td>
 <td align="left">x</td>
 <td align="left">7.0</td>
 <td align="left">[m/ss]</td>
@@ -13436,6 +13431,7 @@
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
+<td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
@@ -13455,6 +13451,7 @@
 <td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
+<td align="left">o</td>
 <td align="left">x</td>
 <td align="left">5.0</td>
 <td align="left">[rad/s]</td>
@@ -13466,6 +13463,7 @@
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
+<td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
 <td align="left">o</td>
@@ -13484,6 +13482,7 @@
 <td align="left">x</td>
 <td align="left">o</td>
 <td align="left">o</td>
+<td align="left">o</td>
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">1.0</td>
@@ -13499,6 +13498,7 @@
 <td align="left">x</td>
 <td align="left">o</td>
 <td align="left">o</td>
+<td align="left">o</td>
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">1.0</td>
@@ -13508,6 +13508,7 @@
 <td align="left">acceleration_map_path</td>
 <td align="left">string</td>
 <td align="left">path to csv file for acceleration map which converts velocity and ideal acceleration to actual acceleration</td>
+<td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
@@ -13530,6 +13531,7 @@
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
+<td align="left">x</td>
 <td align="left">o</td>
 <td align="left">-</td>
 <td align="left">[-]</td>
@@ -13545,6 +13547,7 @@
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
+<td align="left">x</td>
 <td align="left">o</td>
 <td align="left">-</td>
 <td align="left">[-]</td>
@@ -13553,6 +13556,7 @@
 <td align="left">model_class_names</td>
 <td align="left">string</td>
 <td align="left">name of the class that implements the model</td>
+<td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
 <td align="left">x</td>
