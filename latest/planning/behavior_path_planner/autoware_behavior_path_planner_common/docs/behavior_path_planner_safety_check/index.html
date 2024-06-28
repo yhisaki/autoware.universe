@@ -9231,8 +9231,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_8_10" id="__nav_8_10_label" tabindex="0">
@@ -9266,20 +9264,6 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../../../../rtc_replayer" class="md-nav__link">
-        RTC Replayer
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
     
     <li class="md-nav__item md-nav__item--nested">
       
@@ -9288,7 +9272,7 @@
       
         
       
-      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_10_3" >
+      <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8_10_2" >
       
       
         
@@ -9298,13 +9282,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_8_10_3" id="__nav_8_10_3_label" tabindex="0">
+        <label class="md-nav__link" for="__nav_8_10_2" id="__nav_8_10_2_label" tabindex="0">
           Planning Debug Tools
           <span class="md-nav__icon md-icon"></span>
         </label>
       
-      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_10_3_label" aria-expanded="false">
-        <label class="md-nav__title" for="__nav_8_10_3">
+      <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_8_10_2_label" aria-expanded="false">
+        <label class="md-nav__title" for="__nav_8_10_2">
           <span class="md-nav__icon md-icon"></span>
           Planning Debug Tools
         </label>
@@ -13100,11 +13084,11 @@
 <div class="arithmatex">\[
 rss_{dist} = v_{rear} (t_{reaction} + t_{margin}) + \frac{v_{rear}^2}{2|a_{rear, decel}|} - \frac{v_{front}^2}{2|a_{front, decel|}}
 \]</div>
-<p>where <span class="arithmatex">\(V_{front}\)</span>, <span class="arithmatex">\(v_{rear}\)</span> are front and rear vehicle velocity respectively and <span class="arithmatex">\(a_{rear, front}\)</span>, <span class="arithmatex">\(a_{rear, decel}\)</span> are front and rear vehicle deceleration.</p>
+<p>where <span class="arithmatex">\(V_{front}\)</span>, <span class="arithmatex">\(v_{rear}\)</span> are front and rear vehicle velocity respectively and <span class="arithmatex">\(a_{rear, front}\)</span>, <span class="arithmatex">\(a_{rear, decel}\)</span> are front and rear vehicle deceleration. Note that RSS distance is normally used for objects traveling in the same direction, if the yaw difference between a given ego pose and object pose is more than a user-defined yaw difference threshold, the rss collision check will be skipped for that specific pair of poses.</p>
 <h4 id="5-create-extended-ego-and-target-object-polygons">5. Create extended ego and target object polygons<a class="headerlink" href="#5-create-extended-ego-and-target-object-polygons" title="Permanent link">#</a></h4>
 <p>In this step, we compute extended ego and target object polygons. The extended polygons can be described as:</p>
 <p><img alt="extended_polygons" src="../../images/path_safety_checker/extended_polygons.drawio.svg"></p>
-<p>As the picture shows, we expand the rear object polygon. For the longitudinal side, we extend it with the RSS distance, and for the lateral side, we extend it by the lateral margin</p>
+<p>As the picture shows, we expand the rear object polygon. For the longitudinal side, we extend it with the RSS distance, and for the lateral side, we extend it by the lateral margin.</p>
 <h4 id="6-check-overlap">6. Check overlap<a class="headerlink" href="#6-check-overlap" title="Permanent link">#</a></h4>
 <p>Similar to the previous step, we check the overlap of the extended rear object polygon and front object polygon. If they are overlapped each other, we regard it as the unsafe situation.</p></div>
 
