@@ -15,15 +15,15 @@
 #ifndef AUTOWARE__MOTION_UTILS__TRAJECTORY_CONTAINER__TRAJECTORY__TRAJECTORY_HPP_
 #define AUTOWARE__MOTION_UTILS__TRAJECTORY_CONTAINER__TRAJECTORY__TRAJECTORY_HPP_
 
+#include "autoware/motion_utils/trajectory_container/interpolator/interpolator.hpp"
 #include "autoware_auto_common/helper_functions/crtp.hpp"
 
-#include "geometry_msgs/msg/point.hpp"
-#include "geometry_msgs/msg/pose.hpp"
+#include <geometry_msgs/msg/point.hpp>
+#include <geometry_msgs/msg/pose.hpp>
 
 #include <fmt/format.h>
 
-#include <memory>
-#include <vector>
+#include <iostream>
 
 namespace autoware::motion_utils::trajectory_container::trajectory
 {
@@ -53,7 +53,7 @@ public:
    * @param end End position.
    * @return Reference to the cropped trajectory.
    */
-  TrajectoryType & cropInPlace(const double & start, const double & end)
+  TrajectoryType & crop_in_place(const double & start, const double & end)
   {
     this->impl().start_ += start;
     this->impl().end_ = this->impl().start_ + end;
@@ -83,7 +83,7 @@ public:
   TrajectoryType crop(const double & start, const double & end) const
   {
     TrajectoryType trajectory = this->impl();
-    trajectory.cropInPlace(start, end);
+    trajectory.crop_in_place(start, end);
     return trajectory;
   }
 };
@@ -97,17 +97,11 @@ class SetXYZInterpolatorImpl : public autoware::common::helper_functions::crtp<
                                  TrajectoryType, SetXYZInterpolatorImpl<TrajectoryType>>
 {
 public:
-  /**
-   * @brief Sets the XY interpolator.
-   * @param interpolator Interpolator object.
-   * @return Reference to the trajectory with XY interpolator set.
-   */
-  TrajectoryType & set_xy_interpolator(const interpolator::Interpolator<double> & interpolator)
+  template <class Interpolator>
+  TrajectoryType & set_xy_interpolator(const Interpolator & interpolator)
   {
-    this->impl().x_interpolator_ =
-      std::shared_ptr<interpolator::Interpolator<double>>(interpolator.clone());
-    this->impl().y_interpolator_ =
-      std::shared_ptr<interpolator::Interpolator<double>>(interpolator.clone());
+    this->impl().x_interpolator_ = std::make_shared<Interpolator>(interpolator);
+    this->impl().y_interpolator_ = std::make_shared<Interpolator>(interpolator);
     return this->impl();
   }
 
@@ -116,10 +110,10 @@ public:
    * @param interpolator Interpolator object.
    * @return Reference to the trajectory with Z interpolator set.
    */
-  TrajectoryType & set_z_interpolator(const interpolator::Interpolator<double> & interpolator)
+  template <class Interpolator>
+  TrajectoryType & set_z_interpolator(const Interpolator & interpolator)
   {
-    this->impl().z_interpolator_ =
-      std::shared_ptr<interpolator::Interpolator<double>>(interpolator.clone());
+    this->impl().z_interpolator_ = std::make_shared<Interpolator>(interpolator);
     return this->impl();
   }
 };
@@ -139,17 +133,13 @@ public:
    * @param interpolator Interpolator object.
    * @return Reference to the trajectory with orientation interpolator set.
    */
-  TrajectoryType & set_orientation_interpolator(
-    const interpolator::Interpolator<double> & interpolator)
+  template <class Interpolator>
+  TrajectoryType & set_orientation_interpolator(const Interpolator & interpolator)
   {
-    this->impl().orientation_x_interpolator_ =
-      std::shared_ptr<interpolator::Interpolator<double>>(interpolator.clone());
-    this->impl().orientation_y_interpolator_ =
-      std::shared_ptr<interpolator::Interpolator<double>>(interpolator.clone());
-    this->impl().orientation_z_interpolator_ =
-      std::shared_ptr<interpolator::Interpolator<double>>(interpolator.clone());
-    this->impl().orientation_w_interpolator_ =
-      std::shared_ptr<interpolator::Interpolator<double>>(interpolator.clone());
+    this->impl().orientation_x_interpolator_ = std::make_shared<Interpolator>(interpolator);
+    this->impl().orientation_y_interpolator_ = std::make_shared<Interpolator>(interpolator);
+    this->impl().orientation_z_interpolator_ = std::make_shared<Interpolator>(interpolator);
+    this->impl().orientation_w_interpolator_ = std::make_shared<Interpolator>(interpolator);
     return this->impl();
   }
 };

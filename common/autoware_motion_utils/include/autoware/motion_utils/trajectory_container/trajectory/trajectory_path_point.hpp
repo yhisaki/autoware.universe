@@ -17,12 +17,10 @@
 
 #include "autoware/motion_utils/trajectory_container/detail/manipulable_interpolated_array.hpp"
 #include "autoware/motion_utils/trajectory_container/trajectory/trajectory.hpp"
-#include "autoware/motion_utils/trajectory_container/trajectory/trajectory_point.hpp"
 #include "autoware/motion_utils/trajectory_container/trajectory/trajectory_pose.hpp"
 
-#include "autoware_planning_msgs/msg/path_point.hpp"
+#include <autoware_planning_msgs/msg/path_point.hpp>
 
-#include <memory>
 #include <vector>
 
 namespace autoware::motion_utils::trajectory_container::trajectory
@@ -63,23 +61,23 @@ public:
    * @param points Vector of path points
    * @return Reference to this object
    */
-  TrajectoryContainer & build(const std::vector<PathPoint> points);
+  TrajectoryContainer & build(const std::vector<PathPoint> & points);
 
   /**
    * @brief Compute the path point on the trajectory at a given s value
    * @param s Arc length
    * @return Path point on the trajectory
    */
-  PathPoint compute(const double & s) const;
+  [[nodiscard]] PathPoint compute(const double & s) const;
 
   /**
    * @brief Restore the trajectory path points
    * @return Vector of path points
    */
-  std::vector<PathPoint> restore() const;
+  [[nodiscard]] std::vector<PathPoint> restore() const;
 
   using detail::CropTrajectoryImpl<TrajectoryContainer<PathPoint>>::crop;
-  using detail::CropTrajectoryImpl<TrajectoryContainer<PathPoint>>::cropInPlace;
+  using detail::CropTrajectoryImpl<TrajectoryContainer<PathPoint>>::crop_in_place;
   using detail::SetXYZInterpolatorImpl<TrajectoryContainer<PathPoint>>::set_xy_interpolator;
   using detail::SetXYZInterpolatorImpl<TrajectoryContainer<PathPoint>>::set_z_interpolator;
   using detail::SetOrientationInterpolatorImpl<

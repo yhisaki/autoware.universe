@@ -88,13 +88,11 @@ private:
 public:
   ManipulableInterpolatedArray() = default;
 
-  /**
-   * @brief Set the interpolator for the array.
-   * @param interpolator The interpolator to be set.
-   * @return Reference to the ManipulableInterpolatedArray object.
-   */
-  ManipulableInterpolatedArray & set_interpolator(
-    const interpolator::Interpolator<T> & interpolator);
+  template <class Interpolator>
+  ManipulableInterpolatedArray & set_interpolator(const Interpolator & interpolator) {
+    interpolator_ = std::make_shared<Interpolator>(interpolator);
+    return *this;
+  }
 
   /**
    * @brief Build the array with specified axis and values.

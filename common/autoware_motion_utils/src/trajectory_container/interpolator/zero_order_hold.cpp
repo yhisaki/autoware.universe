@@ -16,37 +16,27 @@
 
 #include <Eigen/Dense>
 
-#include <algorithm>
 #include <vector>
 
-namespace autoware::motion_utils::trajectory_container::interpolator
-{
-
-namespace detail
+namespace autoware::motion_utils::trajectory_container::interpolator::detail
 {
 
 template <typename T>
-T ZeroOrderHold_<T>::compute_(const double & s) const
+T ZeroOrderHoldCommonImpl<T>::compute_impl(const double & s) const
 {
-  auto it = std::lower_bound(this->axis.data(), this->axis.data() + this->axis.size(), s);
-  if (it == this->axis.data()) return this->values[0];
-  if (it == this->axis.data() + this->axis.size()) return this->values[this->axis.size() - 1];
-  return this->values[it - this->axis.data() - 1];
+  int idx = this->get_index(s);
+  return this->values[idx];
 }
 
 template <typename T>
-void ZeroOrderHold_<T>::build_(
-  const Eigen::Ref<const Eigen::VectorXd> & axis, const std::vector<T> & values)
+void ZeroOrderHoldCommonImpl<T>::build_impl(const std::vector<T> & values)
 {
-  this->axis = axis;
   this->values = values;
 }
 
 // Explicit template instantiation
-template class ZeroOrderHold_<double>;
-template class ZeroOrderHold_<std::vector<int64_t>>;
-template class ZeroOrderHold_<std::vector<std::vector<int64_t>>>;
+template class ZeroOrderHoldCommonImpl<double>;
+template class ZeroOrderHoldCommonImpl<std::vector<int64_t>>;
+template class ZeroOrderHoldCommonImpl<std::vector<std::vector<int64_t>>>;
 
-}  // namespace detail
-
-}  // namespace autoware::motion_utils::trajectory_container::interpolator
+}  // namespace autoware::motion_utils::trajectory_container::interpolator::detail

@@ -60,12 +60,6 @@ public:
   TrajectoryContainer();
 
   /**
-   * @brief Copy constructor
-   * @param other Other object
-   */
-  TrajectoryContainer(const TrajectoryContainer & other) = default;
-
-  /**
    * @brief Build trajectory from points
    * @param points Vector of points
    * @return Reference to this object
@@ -76,48 +70,48 @@ public:
    * @brief Get the length of the trajectory
    * @return Length of the trajectory
    */
-  double length() const;
+  [[nodiscard]] double length() const;
 
   /**
    * @brief Compute the point on the trajectory at a given s value
    * @param s Arc length
    * @return Point on the trajectory
    */
-  geometry_msgs::msg::Point compute(const double & s) const;
+  [[nodiscard]] geometry_msgs::msg::Point compute(const double & s) const;
 
   /**
    * @brief Get the direction at a given s value
    * @param s Arc length
    * @return Direction in radians
    */
-  double direction(const double & s) const;
+  [[nodiscard]] double direction(const double & s) const;
 
   /**
    * @brief Get the curvature at a given s value
    * @param s Arc length
    * @return Curvature
    */
-  double curvature(const double & s) const;
+  [[nodiscard]] double curvature(const double & s) const;
 
   /**
-   * @brief Find the nearest point with constraint
+   * @brief Find the closest point with constraint
    * @tparam InputPointType Type of input point
    * @param p Input point
    * @param constraints Constraint function
-   * @return Optional arc length of the nearest point
+   * @return Optional arc length of the closest point
    */
   template <typename InputPointType>
-  std::optional<double> nearest_with_constraint(
+  [[nodiscard]] std::optional<double> closest_with_constraint(
     const InputPointType & p, const ConstraintFunction & constraints) const;
 
   /**
-   * @brief Find the nearest point
+   * @brief Find the closest point
    * @tparam InputPointType Type of input point
    * @param p Input point
-   * @return Arc length of the nearest point
+   * @return Arc length of the closest point
    */
   template <typename InputPointType>
-  double nearest(const InputPointType & p) const;
+  [[nodiscard]] double closest(const InputPointType & p) const;
   /**
    * @brief Find the crossing point
    * @tparam InputPointType Type of input point
@@ -126,13 +120,14 @@ public:
    * @return Optional arc length of the crossing point
    */
   template <typename InputPointType>
-  std::optional<double> crossed(const InputPointType & start, const InputPointType & end) const;
+  [[nodiscard]] std::optional<double> crossed(
+    const InputPointType & start, const InputPointType & end) const;
 
   /**
    * @brief Restore the trajectory points
    * @return Vector of points
    */
-  std::vector<geometry_msgs::msg::Point> restore() const;
+  [[nodiscard]] std::vector<geometry_msgs::msg::Point> restore() const;
 };
 
 }  // namespace autoware::motion_utils::trajectory_container::trajectory

@@ -20,6 +20,7 @@
 
 #include <fmt/format.h>
 
+#include <iterator>
 #include <stdexcept>
 #include <vector>
 
@@ -28,7 +29,6 @@ namespace autoware::motion_utils::trajectory_container::interpolator
 
 namespace detail
 {
-
 /**
  * @brief Base class for interpolation implementations.
  *
@@ -38,23 +38,23 @@ namespace detail
  * @tparam T The type of the values being interpolated.
  */
 template <typename T>
-class Interpolator_
+class InterpolatorCommonImpl
 {
 private:
   bool is_built_ = false;  ///< Flag indicating if the interpolator has been built.
-  double start_;           ///< Start of the interpolation range.
-  double end_;             ///< End of the interpolation range.
 
 protected:
+  Eigen::VectorXd axis_;  ///< Axis values for the interpolation.
+
   /**
    * @brief Get the start of the interpolation range.
    */
-  double start() const { return start_; }
+  [[nodiscard]] double start() const { return axis_(0); }
 
   /**
    * @brief Get the end of the interpolation range.
    */
-  double end() const { return end_; }
+  [[nodiscard]] double end() const { return axis_(axis_.size() - 1); }
 
   /**
    * @brief Compute the interpolated value at the given point.
@@ -64,18 +64,16 @@ protected:
    * @param s The point at which to compute the interpolated value.
    * @return The interpolated value.
    */
-  virtual T compute_(const double & s) const = 0;
+  [[nodiscard]] virtual T compute_impl(const double & s) const = 0;
 
   /**
-   * @brief Build the interpolator with the given axis and values.
+   * @brief Build the interpolator with the given values.
    *
    * This method should be overridden by subclasses to provide the specific build logic.
    *
-   * @param axis The axis values.
    * @param values The values to interpolate.
    */
-  virtual void build_(
-    const Eigen::Ref<const Eigen::VectorXd> & axis, const std::vector<T> & values) = 0;
+  virtual void build_impl(const std::vector<T> & values) = 0;
 
   /**
    * @brief Validate the input to the build method.
@@ -118,12 +116,10 @@ protected:
     if (!is_built_) {
       throw std::runtime_error("Interpolator has not been built yet.");
     }
-    if (s < start_ || s > end_) {
+    if (s < start() || s > end()) {
       RCLCPP_WARN(
         rclcpp::get_logger("InterpolatorBase"),
-        fmt::format(
-          "Input value {} is outside the range of the interpolator [{}, {}].", s, start_, end_)
-          .c_str());
+        "Input value %f is outside the range of the interpolator [%f, %f].", s, start(), end());
     }
   }
 
@@ -135,14 +131,13 @@ public:
    * @param values The values to interpolate.
    * @return Reference to the interpolator.
    */
-  Interpolator_ & build(
+  InterpolatorCommonImpl & build(
     const Eigen::Ref<const Eigen::VectorXd> & axis, const std::vector<T> & values)
   {
     validate_build_input(axis, values);
-    build_(axis, values);
+    this->axis_ = axis;
+    build_impl(values);
     this->is_built_ = true;
-    start_ = axis(0);
-    end_ = axis(axis.size() - 1);
     return *this;
   };
 
@@ -153,9 +148,9 @@ public:
    * @param values The values to interpolate.
    * @return Reference to the interpolator.
    */
-  Interpolator_ & build(const std::vector<double> & axis, const std::vector<T> & values)
+  InterpolatorCommonImpl & build(const std::vector<double> & axis, const std::vector<T> & values)
   {
-    Eigen::Map<const Eigen::VectorXd> axis_map(axis.data(), axis.size());
+    Eigen::Map<const Eigen::VectorXd> axis_map(axis.data(), static_cast<Eigen::Index>(axis.size()));
     return build(axis_map, values);
   }
 
@@ -166,7 +161,12 @@ public:
    *
    * @return The minimum number of required points.
    */
-  virtual size_t minimum_required_points() const = 0;
+  [[nodiscard]] virtual size_t minimum_required_points() const = 0;
+
+  [[nodiscard]] int get_index(const double & s) const
+  {
+    return std::distance(axis_.begin(), std::lower_bound(axis_.begin(), axis_.end(), s)) - 1;
+  }
 
   /**
    * @brief Compute the interpolated value at the given point.
@@ -174,25 +174,11 @@ public:
    * @param s The point at which to compute the interpolated value.
    * @return The interpolated value.
    */
-  T compute(const double & s) const
+  [[nodiscard]] T compute(const double & s) const
   {
     validate_compute_input(s);
-    return compute_(s);
+    return compute_impl(s);
   }
-
-  /**
-   * @brief Create a clone of the interpolator.
-   *
-   * This method should be overridden by subclasses to return a copy of the interpolator.
-   *
-   * @return A pointer to the cloned interpolator.
-   */
-  virtual Interpolator_ * clone() const = 0;
-
-  /**
-   * @brief Destructor for the interpolator.
-   */
-  virtual ~Interpolator_() = default;
 };
 
 }  // namespace detail
@@ -202,13 +188,11 @@ public:
  *
  * This class serves as the base class for specific interpolation types.
  *
- * @tparam T The type of the values being interpolated.
+ * @tparam T The type of the values being interpolated. (e.g. double, int, etc.)
  */
 template <typename T>
-class Interpolator : public detail::Interpolator_<T>
+class Interpolator : public detail::InterpolatorCommonImpl<T>
 {
-public:
-  Interpolator<T> * clone() const override = 0;
 };
 
 /**
@@ -217,7 +201,7 @@ public:
  * This class adds methods for computing first and second derivatives.
  */
 template <>
-class Interpolator<double> : public detail::Interpolator_<double>
+class Interpolator<double> : public detail::InterpolatorCommonImpl<double>
 {
 protected:
   /**
@@ -228,7 +212,7 @@ protected:
    * @param s The point at which to compute the first derivative.
    * @return The first derivative.
    */
-  virtual double compute_first_derivative_(const double & s) const = 0;
+  [[nodiscard]] virtual double compute_first_derivative_impl(const double & s) const = 0;
 
   /**
    * @brief Compute the second derivative at the given point.
@@ -238,12 +222,10 @@ protected:
    * @param s The point at which to compute the second derivative.
    * @return The second derivative.
    */
-  virtual double compute_second_derivative_(const double & s) const = 0;
+  [[nodiscard]] virtual double compute_second_derivative_impl(const double & s) const = 0;
 
 public:
   Interpolator() = default;
-
-  Interpolator<double> * clone() const override = 0;
 
   /**
    * @brief Compute the first derivative at the given point.
@@ -251,10 +233,10 @@ public:
    * @param s The point at which to compute the first derivative.
    * @return The first derivative.
    */
-  double compute_first_derivative(const double & s) const
+  [[nodiscard]] double compute_first_derivative(const double & s) const
   {
     this->validate_compute_input(s);
-    return compute_first_derivative_(s);
+    return compute_first_derivative_impl(s);
   }
 
   /**
@@ -263,75 +245,12 @@ public:
    * @param s The point at which to compute the second derivative.
    * @return The second derivative.
    */
-  double compute_second_derivative(const double & s) const
+  [[nodiscard]] double compute_second_derivative(const double & s) const
   {
     this->validate_compute_input(s);
-    return compute_second_derivative_(s);
+    return compute_second_derivative_impl(s);
   }
-
-  /**
-   * @brief Destructor for the interpolator.
-   */
-  virtual ~Interpolator() = default;
 };
-
-namespace detail
-{
-
-/**
- * @brief CRTP base class for interpolation implementations.
- *
- * This class provides the common functionality for interpolation implementations using the CRTP
- * pattern.
- *
- * @tparam Derived The derived class.
- * @tparam T The type of the values being interpolated.
- */
-template <typename Derived, typename T>
-class InterpolatorCRTP : public Interpolator<T>
-{
-public:
-  /**
-   * @brief Create a clone of the interpolator.
-   *
-   * @return A pointer to the cloned interpolator.
-   */
-  Interpolator<T> * clone() const override
-  {
-    return new Derived(static_cast<const Derived &>(*this));
-  }
-
-  /**
-   * @brief Build the interpolator with the given axis and values.
-   *
-   * @param axis The axis values.
-   * @param values The values to interpolate.
-   * @return Reference to the derived interpolator.
-   */
-  Derived & build(const Eigen::Ref<const Eigen::VectorXd> & axis, const std::vector<T> & values)
-  {
-    return static_cast<Derived &>(Interpolator<T>::build(axis, values));
-  };
-
-  /**
-   * @brief Build the interpolator with the given axis and values.
-   *
-   * @param axis The axis values.
-   * @param values The values to interpolate.
-   * @return Reference to the derived interpolator.
-   */
-  Derived & build(const std::vector<double> & axis, const std::vector<T> & values)
-  {
-    return static_cast<Derived &>(Interpolator<T>::build(axis, values));
-  }
-
-  /**
-   * @brief Destructor for the interpolator.
-   */
-  virtual ~InterpolatorCRTP() = default;
-};
-
-}  // namespace detail
 
 }  // namespace autoware::motion_utils::trajectory_container::interpolator
 

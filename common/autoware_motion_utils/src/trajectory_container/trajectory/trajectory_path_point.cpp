@@ -14,13 +14,13 @@
 
 #include "autoware/motion_utils/trajectory_container/trajectory/trajectory_path_point.hpp"
 
-#include "autoware/motion_utils/trajectory_container/detail/merge_vector.hpp"
+#include "autoware/motion_utils/trajectory_container/detail/utils.hpp"
 #include "autoware/motion_utils/trajectory_container/interpolator/zero_order_hold.hpp"
 
 namespace autoware::motion_utils::trajectory_container::trajectory
 {
 
-TrajectoryContainer<PathPoint>::TrajectoryContainer() : BaseClass()
+TrajectoryContainer<PathPoint>::TrajectoryContainer()
 {
   set_longitudinal_velocity_mps_interpolator(interpolator::ZeroOrderHold<double>());
   set_lateral_velocity_mps_interpolator(interpolator::ZeroOrderHold<double>());
@@ -28,11 +28,12 @@ TrajectoryContainer<PathPoint>::TrajectoryContainer() : BaseClass()
 }
 
 TrajectoryContainer<PathPoint> & TrajectoryContainer<PathPoint>::build(
-  const std::vector<PathPoint> points)
+  const std::vector<PathPoint> & points)
 {
   std::vector<geometry_msgs::msg::Pose> poses;
-  std::vector<double> longitudinal_velocity_mps_values, lateral_velocity_mps_values,
-    heading_rate_rps_values;
+  std::vector<double> longitudinal_velocity_mps_values;
+  std::vector<double> lateral_velocity_mps_values;
+  std::vector<double> heading_rate_rps_values;
 
   for (const auto & point : points) {
     poses.emplace_back(point.pose);
@@ -53,9 +54,9 @@ PathPoint TrajectoryContainer<PathPoint>::compute(const double & s) const
 {
   PathPoint result;
   result.pose = TrajectoryContainer<geometry_msgs::msg::Pose>::compute(s);
-  result.longitudinal_velocity_mps = longitudinal_velocity_mps.compute(s);
-  result.lateral_velocity_mps = lateral_velocity_mps.compute(s);
-  result.heading_rate_rps = heading_rate_rps.compute(s);
+  result.longitudinal_velocity_mps = static_cast<float>(longitudinal_velocity_mps.compute(s));
+  result.lateral_velocity_mps = static_cast<float>(lateral_velocity_mps.compute(s));
+  result.heading_rate_rps = static_cast<float>(heading_rate_rps.compute(s));
   return result;
 }
 

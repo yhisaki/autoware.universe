@@ -17,8 +17,6 @@
 
 #include "autoware/motion_utils/trajectory_container/interpolator/interpolator.hpp"
 
-#include <Eigen/Dense>
-
 #include <vector>
 
 namespace autoware::motion_utils::trajectory_container::interpolator
@@ -38,18 +36,17 @@ namespace detail
 {
 
 /**
- * @brief Base class for nearest neighbor interpolation.
+ * @brief Common Implementation of nearest neighbor.
  *
  * This class implements the core functionality for nearest neighbor interpolation.
  *
  * @tparam T The type of the values being interpolated.
  */
 template <typename T>
-class NearestNeighbor_ : public InterpolatorCRTP<NearestNeighbor<T>, T>
+class NearestNeighborCommonImpl : public Interpolator<T>
 {
 protected:
-  Eigen::VectorXd axis;   ///< Axis values for the interpolation.
-  std::vector<T> values;  ///< Interpolation values.
+  std::vector<T> values_;  ///< Interpolation values.
 
   /**
    * @brief Compute the interpolated value at the given point.
@@ -57,34 +54,27 @@ protected:
    * @param s The point at which to compute the interpolated value.
    * @return The interpolated value.
    */
-  T compute_(const double & s) const override;
+  [[nodiscard]] T compute_impl(const double & s) const override;
 
   /**
-   * @brief Build the interpolator with the given axis and values.
+   * @brief Build the interpolator with the given values.
    *
-   * @param axis The axis values.
    * @param values The values to interpolate.
    */
-  void build_(
-    const Eigen::Ref<const Eigen::VectorXd> & axis, const std::vector<T> & values) override;
+  void build_impl(const std::vector<T> & values) override;
 
 public:
   /**
    * @brief Default constructor.
    */
-  NearestNeighbor_() = default;
-
-  /**
-   * @brief Destructor.
-   */
-  virtual ~NearestNeighbor_() = default;
+  NearestNeighborCommonImpl() = default;
 
   /**
    * @brief Get the minimum number of required points for the interpolator.
    *
    * @return The minimum number of required points.
    */
-  size_t minimum_required_points() const override { return 1; }
+  [[nodiscard]] size_t minimum_required_points() const override { return 1; }
 };
 
 }  // namespace detail
@@ -97,7 +87,7 @@ public:
  * @tparam T The type of the values being interpolated.
  */
 template <typename T>
-class NearestNeighbor : public detail::NearestNeighbor_<T>
+class NearestNeighbor : public detail::NearestNeighborCommonImpl<T>
 {
 };
 
@@ -107,7 +97,7 @@ class NearestNeighbor : public detail::NearestNeighbor_<T>
  * This class provides methods to perform nearest neighbor interpolation on double values.
  */
 template <>
-class NearestNeighbor<double> : public detail::NearestNeighbor_<double>
+class NearestNeighbor<double> : public detail::NearestNeighborCommonImpl<double>
 {
 private:
   /**
@@ -116,7 +106,7 @@ private:
    * @param s The point at which to compute the first derivative.
    * @return The first derivative.
    */
-  double compute_first_derivative_(const double &) const override { return 0.0; }
+  [[nodiscard]] double compute_first_derivative_impl(const double &) const override { return 0.0; }
 
   /**
    * @brief Compute the second derivative at the given point.
@@ -124,7 +114,7 @@ private:
    * @param s The point at which to compute the second derivative.
    * @return The second derivative.
    */
-  double compute_second_derivative_(const double &) const override { return 0.0; }
+  [[nodiscard]] double compute_second_derivative_impl(const double &) const override { return 0.0; }
 };
 
 }  // namespace autoware::motion_utils::trajectory_container::interpolator
