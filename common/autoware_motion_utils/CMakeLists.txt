@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(autoware_motion_utils)
 
+option(BUILD_EXAMPLES "Build examples" OFF)
+
 find_package(autoware_cmake REQUIRED)
 autoware_package()
 
@@ -23,6 +25,16 @@ if(BUILD_TESTING)
   ament_add_ros_isolated_gtest(test_autoware_motion_utils ${test_files})
 
   target_link_libraries(test_autoware_motion_utils
+    autoware_motion_utils
+  )
+endif()
+
+if (BUILD_EXAMPLES)
+  ament_auto_add_executable(example_autoware_motion_utils
+    examples/example_trajectory_container.cpp
+  )
+
+  target_link_libraries(example_autoware_motion_utils
     autoware_motion_utils
   )
 endif()
