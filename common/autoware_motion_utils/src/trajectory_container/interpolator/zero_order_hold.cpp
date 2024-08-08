@@ -24,7 +24,7 @@ namespace autoware::motion_utils::trajectory_container::interpolator::detail
 template <typename T>
 T ZeroOrderHoldCommonImpl<T>::compute_impl(const double & s) const
 {
-  int idx = this->get_index(s);
+  int idx = this->get_index(s, true);
   return this->values[idx];
 }
 

@@ -163,9 +163,13 @@ public:
    */
   [[nodiscard]] virtual size_t minimum_required_points() const = 0;
 
-  [[nodiscard]] int get_index(const double & s) const
+  [[nodiscard]] int get_index(const double & s, bool include_end = true) const
   {
-    return std::distance(axis_.begin(), std::lower_bound(axis_.begin(), axis_.end(), s)) - 1;
+    if (include_end && s == end()) {
+      return static_cast<int>(axis_.size()) - 2;
+    }
+    auto comp = [](const double & a, const double & b) { return a <= b; };
+    return std::distance(axis_.begin(), std::lower_bound(axis_.begin(), axis_.end(), s, comp)) - 1;
   }
 
   /**

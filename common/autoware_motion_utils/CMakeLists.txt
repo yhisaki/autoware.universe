@@ -29,13 +29,22 @@ if(BUILD_TESTING)
   )
 endif()
 
-if (BUILD_EXAMPLES)
-  ament_auto_add_executable(example_autoware_motion_utils
+if(BUILD_EXAMPLES)
+  include(FetchContent)
+  FetchContent_Declare(
+    matplotlibcpp17
+    GIT_REPOSITORY https://github.com/soblin/matplotlibcpp17.git
+    GIT_TAG master
+  )
+  FetchContent_MakeAvailable(matplotlibcpp17)
+
+  ament_auto_add_executable(example_trajectory_container
     examples/example_trajectory_container.cpp
   )
 
-  target_link_libraries(example_autoware_motion_utils
+  target_link_libraries(example_trajectory_container
     autoware_motion_utils
+    matplotlibcpp17::matplotlibcpp17
   )
 endif()
 
