@@ -84,7 +84,7 @@ public:
    *
    * @return The minimum number of required points.
    */
-  [[nodiscard]] size_t minimum_required_points() const override { return 3; }
+  [[nodiscard]] size_t minimum_required_points() const override { return 4; }
 };
 
 }  // namespace autoware::motion_utils::trajectory_container::interpolator
