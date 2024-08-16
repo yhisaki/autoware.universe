@@ -15,7 +15,6 @@
 #ifndef AUTOWARE__MOTION_UTILS__TRAJECTORY_CONTAINER__TRAJECTORY__TRAJECTORY_HPP_
 #define AUTOWARE__MOTION_UTILS__TRAJECTORY_CONTAINER__TRAJECTORY__TRAJECTORY_HPP_
 
-#include "autoware/motion_utils/trajectory_container/interpolator/interpolator.hpp"
 #include "autoware_auto_common/helper_functions/crtp.hpp"
 
 #include <geometry_msgs/msg/point.hpp>
@@ -159,8 +158,8 @@ public:
    * @param interpolator Interpolator object.
    * @return Reference to the trajectory with longitudinal velocity interpolator set.
    */
-  TrajectoryType & set_longitudinal_velocity_mps_interpolator(
-    const interpolator::Interpolator<double> & interpolator)
+  template <class Interpolator>
+  TrajectoryType & set_longitudinal_velocity_mps_interpolator(const Interpolator & interpolator)
   {
     this->impl().longitudinal_velocity_mps.set_interpolator(interpolator);
     return this->impl();
@@ -182,8 +181,8 @@ public:
    * @param interpolator Interpolator object.
    * @return Reference to the trajectory with lateral velocity interpolator set.
    */
-  TrajectoryType & set_lateral_velocity_mps_interpolator(
-    const interpolator::Interpolator<double> & interpolator)
+  template <class Interpolator>
+  TrajectoryType & set_lateral_velocity_mps_interpolator(const Interpolator & interpolator)
   {
     this->impl().lateral_velocity_mps.set_interpolator(interpolator);
     return this->impl();
@@ -205,8 +204,8 @@ public:
    * @param interpolator Interpolator object.
    * @return Reference to the trajectory with heading rate interpolator set.
    */
-  TrajectoryType & set_heading_rate_rps_interpolator(
-    const interpolator::Interpolator<double> & interpolator)
+  template <class Interpolator>
+  TrajectoryType & set_heading_rate_rps_interpolator(const Interpolator & interpolator)
   {
     this->impl().heading_rate_rps.set_interpolator(interpolator);
     return this->impl();
@@ -227,8 +226,8 @@ public:
    * @param interpolator Interpolator object.
    * @return Reference to the trajectory with lane IDs interpolator set.
    */
-  TrajectoryType & set_lane_ids_interpolator(
-    const interpolator::Interpolator<std::vector<int64_t>> & interpolator)
+  template <class Interpolator>
+  TrajectoryType & set_lane_ids_interpolator(const Interpolator & interpolator)
   {
     this->impl().lane_ids.set_interpolator(interpolator);
     return this->impl();
