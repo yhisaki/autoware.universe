@@ -155,17 +155,18 @@ public:
     auto s = closest_with_constraint(p, [](const double &) { return true; });
     return *s;
   }
-
   /**
-   * @brief Find the crossing point
+   * @brief Find the crossing point with constraint
    * @tparam InputPointType Type of input point
    * @param start Start point
    * @param end End point
+   * @param constraints Constraint function
    * @return Optional arc length of the crossing point
    */
   template <typename InputPointType>
-  [[nodiscard]] std::optional<double> crossed(
-    const InputPointType & start, const InputPointType & end) const
+  [[nodiscard]] std::optional<double> crossed_with_constraint(
+    const InputPointType & start, const InputPointType & end,
+    const ConstraintFunction & constraints) const
   {
     using motion_utils::trajectory_container::detail::to_point;
     Eigen::Vector2d line_start(to_point(start).x, to_point(start).y);
@@ -194,13 +195,28 @@ public:
 
       if (t >= 0.0 && t <= 1.0 && u >= 0.0 && u <= 1.0) {
         double intersection_s = axis_(i - 1) + t * (axis_(i) - axis_(i - 1));
-        return intersection_s;
+        if (constraints(intersection_s)) {
+          return intersection_s;
+        }
       }
     }
 
     return std::nullopt;
   }
 
+  /**
+   * @brief Find the crossing point
+   * @tparam InputPointType Type of input point
+   * @param start Start point
+   * @param end End point
+   * @return Optional arc length of the crossing point
+   */
+  template <typename InputPointType>
+  [[nodiscard]] std::optional<double> crossed(
+    const InputPointType & start, const InputPointType & end) const
+  {
+    return crossed_with_constraint(start, end, [](const double &) { return true; });
+  }
   /**
    * @brief Restore the trajectory points
    * @return Vector of points
