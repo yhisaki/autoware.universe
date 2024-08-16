@@ -54,14 +54,18 @@ protected:
    * @param s The point at which to compute the interpolated value.
    * @return The interpolated value.
    */
-  [[nodiscard]] T compute_impl(const double & s) const override;
+  [[nodiscard]] T compute_impl(const double & s) const override
+  {
+    int idx = this->get_index(s, true);
+    return this->values[idx];
+  }
 
   /**
    * @brief Build the interpolator with the given values.
    *
    * @param values The values to interpolate.
    */
-  void build_impl(const std::vector<T> & values) override;
+  void build_impl(const std::vector<T> & values) override { this->values = values; }
 
 public:
   /**
