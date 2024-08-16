@@ -16,41 +16,38 @@
 
 #include <Eigen/Dense>
 
-#include <algorithm>
 #include <vector>
 
 namespace autoware::motion_utils::trajectory_container::interpolator
 {
 
-void Linear::build_(
-  const Eigen::Ref<const Eigen::VectorXd> & axis, const std::vector<double> & values)
+void Linear::build_impl(const std::vector<double> & values)
 {
-  this->axis = axis;
-  this->values = Eigen::Map<const Eigen::VectorXd>(values.data(), values.size());
+  this->values_ =
+    Eigen::Map<const Eigen::VectorXd>(values.data(), static_cast<Eigen::Index>(values.size()));
 }
 
-double Linear::compute_(const double & s) const
+double Linear::compute_impl(const double & s) const
 {
-  auto it = std::lower_bound(this->axis.data(), this->axis.data() + this->axis.size(), s);
-  if (it == this->axis.data()) return this->values(0);
-  if (it == this->axis.data() + this->axis.size()) return this->values(this->axis.size() - 1);
-  int idx = it - this->axis.data() - 1;
-  double x0 = this->axis(idx), x1 = this->axis(idx + 1);
-  double y0 = this->values(idx), y1 = this->values(idx + 1);
+  int idx = this->get_index(s);
+  double x0 = this->axis_(idx);
+  double x1 = this->axis_(idx + 1);
+  double y0 = this->values_(idx);
+  double y1 = this->values_(idx + 1);
   return y0 + (y1 - y0) * (s - x0) / (x1 - x0);
 }
 
-double Linear::compute_first_derivative_(const double & s) const
+double Linear::compute_first_derivative_impl(const double & s) const
 {
-  auto it = std::lower_bound(this->axis.data(), this->axis.data() + this->axis.size(), s);
-  if (it == this->axis.data() || it == this->axis.data() + this->axis.size()) return 0.0;
-  int idx = it - this->axis.data() - 1;
-  double x0 = this->axis(idx), x1 = this->axis(idx + 1);
-  double y0 = this->values(idx), y1 = this->values(idx + 1);
+  int idx = this->get_index(s);
+  double x0 = this->axis_(idx);
+  double x1 = this->axis_(idx + 1);
+  double y0 = this->values_(idx);
+  double y1 = this->values_(idx + 1);
   return (y1 - y0) / (x1 - x0);
 }
 
-double Linear::compute_second_derivative_(const double &) const
+double Linear::compute_second_derivative_impl(const double &) const
 {
   return 0.0;
 }

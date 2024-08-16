@@ -14,13 +14,13 @@
 
 #include "autoware/motion_utils/trajectory_container/trajectory/trajectory_path_point_with_lane_id.hpp"
 
-#include "autoware/motion_utils/trajectory_container/detail/merge_vector.hpp"
+#include "autoware/motion_utils/trajectory_container/detail/utils.hpp"
 #include "autoware/motion_utils/trajectory_container/interpolator/zero_order_hold.hpp"
 
 namespace autoware::motion_utils::trajectory_container::trajectory
 {
 
-TrajectoryContainer<PathPointWithLaneId>::TrajectoryContainer() : BaseClass()
+TrajectoryContainer<PathPointWithLaneId>::TrajectoryContainer()
 {
   set_lane_ids_interpolator(interpolator::ZeroOrderHold<std::vector<int64_t>>());
 }

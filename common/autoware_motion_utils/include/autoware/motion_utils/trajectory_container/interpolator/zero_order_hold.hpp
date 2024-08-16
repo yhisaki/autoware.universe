@@ -17,8 +17,6 @@
 
 #include "autoware/motion_utils/trajectory_container/interpolator/interpolator.hpp"
 
-#include <Eigen/Dense>
-
 #include <vector>
 
 namespace autoware::motion_utils::trajectory_container::interpolator
@@ -45,10 +43,9 @@ namespace detail
  * @tparam T The type of the values being interpolated.
  */
 template <typename T>
-class ZeroOrderHold_ : public InterpolatorCRTP<ZeroOrderHold<T>, T>
+class ZeroOrderHoldCommonImpl : public Interpolator<T>
 {
 protected:
-  Eigen::VectorXd axis;   ///< Axis values for the interpolation.
   std::vector<T> values;  ///< Interpolation values.
 
   /**
@@ -57,32 +54,25 @@ protected:
    * @param s The point at which to compute the interpolated value.
    * @return The interpolated value.
    */
-  T compute_(const double & s) const override;
+  [[nodiscard]] T compute_impl(const double & s) const override;
 
   /**
-   * @brief Build the interpolator with the given axis and values.
+   * @brief Build the interpolator with the given values.
    *
-   * @param axis The axis values.
    * @param values The values to interpolate.
    */
-  void build_(
-    const Eigen::Ref<const Eigen::VectorXd> & axis, const std::vector<T> & values) override;
+  void build_impl(const std::vector<T> & values) override;
 
 public:
   /**
    * @brief Default constructor.
    */
-  ZeroOrderHold_() = default;
+  ZeroOrderHoldCommonImpl() = default;
 
   /**
    * @brief Get the minimum number of required points for the interpolator.
    */
-  size_t minimum_required_points() const override { return 2; }
-
-  /**
-   * @brief Destructor.
-   */
-  virtual ~ZeroOrderHold_() = default;
+  [[nodiscard]] size_t minimum_required_points() const override { return 2; }
 };
 
 }  // namespace detail
@@ -95,7 +85,7 @@ public:
  * @tparam T The type of the values being interpolated.
  */
 template <typename T>
-class ZeroOrderHold : public detail::ZeroOrderHold_<T>
+class ZeroOrderHold : public detail::ZeroOrderHoldCommonImpl<T>
 {
 };
 
@@ -105,7 +95,7 @@ class ZeroOrderHold : public detail::ZeroOrderHold_<T>
  * This class provides methods to perform zero order hold interpolation on double values.
  */
 template <>
-class ZeroOrderHold<double> : public detail::ZeroOrderHold_<double>
+class ZeroOrderHold<double> : public detail::ZeroOrderHoldCommonImpl<double>
 {
 private:
   /**
@@ -114,7 +104,7 @@ private:
    * @param s The point at which to compute the first derivative.
    * @return The first derivative.
    */
-  double compute_first_derivative_(const double &) const override { return 0.0; }
+  [[nodiscard]] double compute_first_derivative_impl(const double &) const override { return 0.0; }
 
   /**
    * @brief Compute the second derivative at the given point.
@@ -122,7 +112,7 @@ private:
    * @param s The point at which to compute the second derivative.
    * @return The second derivative.
    */
-  double compute_second_derivative_(const double &) const override { return 0.0; }
+  [[nodiscard]] double compute_second_derivative_impl(const double &) const override { return 0.0; }
 };
 
 }  // namespace autoware::motion_utils::trajectory_container::interpolator

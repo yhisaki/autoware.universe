@@ -27,14 +27,6 @@ RangeSetter<T> ManipulableInterpolatedArray<T>::operator()(const double & start,
 }
 
 template <typename T>
-ManipulableInterpolatedArray<T> & ManipulableInterpolatedArray<T>::set_interpolator(
-  const interpolator::Interpolator<T> & interpolator)
-{
-  interpolator_ = std::shared_ptr<interpolator::Interpolator<T>>(interpolator.clone());
-  return *this;
-}
-
-template <typename T>
 ManipulableInterpolatedArray<T> & ManipulableInterpolatedArray<T>::build(
   const std::vector<double> & axis, const std::vector<T> & values)
 {
@@ -55,7 +47,7 @@ template <typename T>
 ManipulableInterpolatedArray<T> & ManipulableInterpolatedArray<T>::build(
   const Eigen::VectorXd & axis, const std::vector<T> & values)
 {
-  return build(std::vector<double>(axis.data(), axis.data() + axis.size()), values);
+  return build(std::vector<double>(axis.begin(), axis.end()), values);
 }
 
 template <typename T>
@@ -65,7 +57,6 @@ ManipulableInterpolatedArray<T> & ManipulableInterpolatedArray<T>::operator=(con
     throw std::runtime_error("Values array is empty.");
   }
   std::fill(values_.begin(), values_.end(), value);
-  interpolator_ = std::shared_ptr<interpolator::Interpolator<T>>(interpolator_->clone());
   interpolator_->build(axis_, values_);
   return *this;
 }
@@ -116,9 +107,6 @@ RangeSetter<T> & RangeSetter<T>::operator=(const T & value)
     values[it - axis.begin()] = value;
   }
 
-  // Clone the interpolator with updated values
-  parent_.interpolator_ =
-    std::shared_ptr<interpolator::Interpolator<T>>(parent_.interpolator_->clone());
   parent_.interpolator_->build(axis, values);
 
   return *this;

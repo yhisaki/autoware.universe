@@ -14,15 +14,18 @@
 
 #include "autoware/motion_utils/trajectory_container/trajectory/trajectory_point.hpp"
 
-#include "autoware/motion_utils/trajectory_container/detail/types.hpp"
+#include "autoware/motion_utils/trajectory_container/detail/utils.hpp"
 #include "autoware/motion_utils/trajectory_container/interpolator/cubic_spline.hpp"
 #include "autoware/motion_utils/trajectory_container/interpolator/linear.hpp"
 
 #include <fmt/format.h>
 
+#include <cmath>
+
 namespace autoware::motion_utils::trajectory_container::trajectory
 {
 TrajectoryContainer<geometry_msgs::msg::Point>::TrajectoryContainer()
+: start_(std::nan("")), end_(std::nan(""))
 {
   set_xy_interpolator(interpolator::CubicSpline());
   set_z_interpolator(interpolator::Linear());
@@ -31,17 +34,21 @@ TrajectoryContainer<geometry_msgs::msg::Point>::TrajectoryContainer()
 TrajectoryContainer<geometry_msgs::msg::Point> & TrajectoryContainer<
   geometry_msgs::msg::Point>::build(const std::vector<geometry_msgs::msg::Point> & points)
 {
-  std::vector<double> xs, ys, zs;
+  std::vector<double> xs;
+  std::vector<double> ys;
+  std::vector<double> zs;
 
-  axis_.resize(points.size());
+  axis_.resize(static_cast<Eigen::Index>(points.size()));
   axis_(0) = 0.0;
   xs.emplace_back(points[0].x);
   ys.emplace_back(points[0].y);
   zs.emplace_back(points[0].z);
 
   for (size_t i = 1; i < points.size(); ++i) {
-    Eigen::Vector2d p0(points[i - 1].x, points[i - 1].y), p1(points[i].x, points[i].y);
-    axis_(i) = axis_(i - 1) + (p1 - p0).norm();
+    Eigen::Vector2d p0(points[i - 1].x, points[i - 1].y);
+    Eigen::Vector2d p1(points[i].x, points[i].y);
+    axis_(static_cast<Eigen::Index>(i)) =
+      axis_(static_cast<Eigen::Index>(i - 1)) + (p1 - p0).norm();
     xs.emplace_back(points[i].x);
     ys.emplace_back(points[i].y);
     zs.emplace_back(points[i].z);
@@ -102,19 +109,23 @@ double TrajectoryContainer<geometry_msgs::msg::Point>::curvature(const double & 
 using motion_utils::trajectory_container::detail::to_point;
 
 template <typename InputPointType>
-std::optional<double> TrajectoryContainer<geometry_msgs::msg::Point>::nearest_with_constraint(
+std::optional<double> TrajectoryContainer<geometry_msgs::msg::Point>::closest_with_constraint(
   const InputPointType & p, const ConstraintFunction & constraints) const
 {
   Eigen::Vector2d point(to_point(p).x, to_point(p).y);
   std::vector<double> distances_from_segments;
   std::vector<double> lengthes_from_start_points;
   for (int i = 1; i < axis_.size(); ++i) {
-    Eigen::Vector2d p0, p1;
+    Eigen::Vector2d p0;
+    Eigen::Vector2d p1;
     p0 << x_interpolator_->compute(axis_(i - 1)), y_interpolator_->compute(axis_(i - 1));
     p1 << x_interpolator_->compute(axis_(i)), y_interpolator_->compute(axis_(i));
-    Eigen::Vector2d v = p1 - p0, w = point - p0;
-    double c1 = w.dot(v), c2 = v.dot(v);
-    double length_from_start_point, distance_from_segment;
+    Eigen::Vector2d v = p1 - p0;
+    Eigen::Vector2d w = point - p0;
+    double c1 = w.dot(v);
+    double c2 = v.dot(v);
+    double length_from_start_point = NAN;
+    double distance_from_segment = NAN;
     if (c1 <= 0) {
       length_from_start_point = axis_(i - 1);
       distance_from_segment = (point - p0).norm();
@@ -139,9 +150,9 @@ std::optional<double> TrajectoryContainer<geometry_msgs::msg::Point>::nearest_wi
 }
 
 template <typename InputPointType>
-double TrajectoryContainer<geometry_msgs::msg::Point>::nearest(const InputPointType & p) const
+double TrajectoryContainer<geometry_msgs::msg::Point>::closest(const InputPointType & p) const
 {
-  auto s = nearest_with_constraint(p, [](const double &) { return true; });
+  auto s = closest_with_constraint(p, [](const double &) { return true; });
   return *s;
 }
 
@@ -154,7 +165,8 @@ std::optional<double> TrajectoryContainer<geometry_msgs::msg::Point>::crossed(
   Eigen::Vector2d line_dir = line_end - line_start;
 
   for (int i = 1; i < axis_.size(); ++i) {
-    Eigen::Vector2d p0, p1;
+    Eigen::Vector2d p0;
+    Eigen::Vector2d p1;
     p0 << x_interpolator_->compute(axis_(i - 1)), y_interpolator_->compute(axis_(i - 1));
     p1 << x_interpolator_->compute(axis_(i)), y_interpolator_->compute(axis_(i));
 
@@ -195,56 +207,56 @@ std::vector<geometry_msgs::msg::Point> TrajectoryContainer<geometry_msgs::msg::P
   return points;
 }
 
-// Explicit instantiation for nearest_with_constraint
+// Explicit instantiation for closest_with_constraint
 template std::optional<double>
-TrajectoryContainer<geometry_msgs::msg::Point>::nearest_with_constraint(
+TrajectoryContainer<geometry_msgs::msg::Point>::closest_with_constraint(
   const geometry_msgs::msg::Point & p, const ConstraintFunction & constraints) const;
 
 template std::optional<double>
-TrajectoryContainer<geometry_msgs::msg::Point>::nearest_with_constraint(
+TrajectoryContainer<geometry_msgs::msg::Point>::closest_with_constraint(
   const geometry_msgs::msg::Pose & p, const ConstraintFunction & constraints) const;
 
 template std::optional<double>
-TrajectoryContainer<geometry_msgs::msg::Point>::nearest_with_constraint(
+TrajectoryContainer<geometry_msgs::msg::Point>::closest_with_constraint(
   const Eigen::Ref<const Eigen::Vector2d> & p, const ConstraintFunction & constraints) const;
 
 template std::optional<double>
-TrajectoryContainer<geometry_msgs::msg::Point>::nearest_with_constraint(
+TrajectoryContainer<geometry_msgs::msg::Point>::closest_with_constraint(
   const autoware_planning_msgs::msg::PathPoint & p, const ConstraintFunction & constraints) const;
 
 template std::optional<double>
-TrajectoryContainer<geometry_msgs::msg::Point>::nearest_with_constraint(
+TrajectoryContainer<geometry_msgs::msg::Point>::closest_with_constraint(
   const tier4_planning_msgs::msg::PathPointWithLaneId & p,
   const ConstraintFunction & constraints) const;
 
 template std::optional<double>
-TrajectoryContainer<geometry_msgs::msg::Point>::nearest_with_constraint(
+TrajectoryContainer<geometry_msgs::msg::Point>::closest_with_constraint(
   const lanelet::BasicPoint2d & p, const ConstraintFunction & constraints) const;
 
 template std::optional<double>
-TrajectoryContainer<geometry_msgs::msg::Point>::nearest_with_constraint(
+TrajectoryContainer<geometry_msgs::msg::Point>::closest_with_constraint(
   const lanelet::ConstPoint3d & p, const ConstraintFunction & constraints) const;
 
-// Explicit instantiation for nearest
-template double TrajectoryContainer<geometry_msgs::msg::Point>::nearest(
+// Explicit instantiation for closest
+template double TrajectoryContainer<geometry_msgs::msg::Point>::closest(
   const geometry_msgs::msg::Point & p) const;
 
-template double TrajectoryContainer<geometry_msgs::msg::Point>::nearest(
+template double TrajectoryContainer<geometry_msgs::msg::Point>::closest(
   const geometry_msgs::msg::Pose & p) const;
 
-template double TrajectoryContainer<geometry_msgs::msg::Point>::nearest(
+template double TrajectoryContainer<geometry_msgs::msg::Point>::closest(
   const Eigen::Ref<const Eigen::Vector2d> & p) const;
 
-template double TrajectoryContainer<geometry_msgs::msg::Point>::nearest(
+template double TrajectoryContainer<geometry_msgs::msg::Point>::closest(
   const autoware_planning_msgs::msg::PathPoint & p) const;
 
-template double TrajectoryContainer<geometry_msgs::msg::Point>::nearest(
+template double TrajectoryContainer<geometry_msgs::msg::Point>::closest(
   const tier4_planning_msgs::msg::PathPointWithLaneId & p) const;
 
-template double TrajectoryContainer<geometry_msgs::msg::Point>::nearest(
+template double TrajectoryContainer<geometry_msgs::msg::Point>::closest(
   const lanelet::BasicPoint2d & p) const;
 
-template double TrajectoryContainer<geometry_msgs::msg::Point>::nearest(
+template double TrajectoryContainer<geometry_msgs::msg::Point>::closest(
   const lanelet::ConstPoint3d & p) const;
 
 // Explicit instantiation for crossed

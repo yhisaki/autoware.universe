@@ -72,16 +72,16 @@ public:
    * @param s Arc length
    * @return Pose on the trajectory
    */
-  geometry_msgs::msg::Pose compute(const double & s) const;
+  [[nodiscard]] geometry_msgs::msg::Pose compute(const double & s) const;
 
   /**
    * @brief Restore the trajectory poses
    * @return Vector of poses
    */
-  std::vector<geometry_msgs::msg::Pose> restore() const;
+  [[nodiscard]] std::vector<geometry_msgs::msg::Pose> restore() const;
 
   using CropTrajectoryImpl::crop;
-  using CropTrajectoryImpl::cropInPlace;
+  using CropTrajectoryImpl::crop_in_place;
   using SetXYZInterpolatorImpl::set_xy_interpolator;
   using SetXYZInterpolatorImpl::set_z_interpolator;
 };

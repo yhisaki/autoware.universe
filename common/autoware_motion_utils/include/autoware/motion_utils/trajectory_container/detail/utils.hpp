@@ -12,21 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef AUTOWARE__MOTION_UTILS__TRAJECTORY_CONTAINER__DETAIL__TYPES_HPP_
-#define AUTOWARE__MOTION_UTILS__TRAJECTORY_CONTAINER__DETAIL__TYPES_HPP_
+#ifndef AUTOWARE__MOTION_UTILS__TRAJECTORY_CONTAINER__UTILS__TYPES_HPP_
+#define AUTOWARE__MOTION_UTILS__TRAJECTORY_CONTAINER__UTILS__TYPES_HPP_
 
 #include "lanelet2_core/primitives/Point.h"
 
 #include <Eigen/Dense>
 
-#include "autoware_planning_msgs/msg/path_point.hpp"
-#include "tier4_planning_msgs/msg/path_point_with_lane_id.hpp"
+#include <autoware_planning_msgs/msg/path_point.hpp>
 #include <geometry_msgs/msg/point.hpp>
 #include <geometry_msgs/msg/pose.hpp>
+#include <tier4_planning_msgs/msg/path_point_with_lane_id.hpp>
+
+#include <Eigen/src/Core/util/Meta.h>
+
+#include <set>
+#include <vector>
 
 namespace autoware::motion_utils::trajectory_container::detail
 {
-
 geometry_msgs::msg::Point to_point(const geometry_msgs::msg::Point & p)
 {
   return p;
@@ -70,6 +74,32 @@ geometry_msgs::msg::Point to_point(const lanelet::ConstPoint3d & p)
   point.y = p.y();
   return point;
 }
+
+/**
+ * @brief Merge multiple vectors into one, keeping only unique elements.
+ * @tparam Vectors Variadic template parameter for vector types.
+ * @param vectors Vectors to be merged.
+ * @return Merged vector with unique elements.
+ */
+template <typename... Vectors>
+std::vector<double> merge_vectors(const Vectors &... vectors)
+{
+  std::set<double> unique_elements;
+
+  // Helper function to insert elements into the set
+  auto insert_elements = [&unique_elements](const auto & vec) {
+    unique_elements.insert(vec.begin(), vec.end());
+  };
+
+  // Expand the parameter pack and insert elements from each vector
+  (insert_elements(vectors), ...);
+
+  // Convert the set back to a vector
+  std::vector<double> result(unique_elements.begin(), unique_elements.end());
+
+  return result;
+}
+
 }  // namespace autoware::motion_utils::trajectory_container::detail
 
-#endif  // AUTOWARE__MOTION_UTILS__TRAJECTORY_CONTAINER__DETAIL__TYPES_HPP_
+#endif  // AUTOWARE__MOTION_UTILS__TRAJECTORY_CONTAINER__UTILS__TYPES_HPP_

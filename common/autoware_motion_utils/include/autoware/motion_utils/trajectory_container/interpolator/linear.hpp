@@ -29,20 +29,17 @@ namespace autoware::motion_utils::trajectory_container::interpolator
  *
  * This class provides methods to perform linear interpolation on a set of data points.
  */
-class Linear : public detail::InterpolatorCRTP<Linear, double>
+class Linear : public Interpolator<double>
 {
 private:
-  Eigen::VectorXd axis;    ///< Axis values for the interpolation.
-  Eigen::VectorXd values;  ///< Interpolation values.
+  Eigen::VectorXd values_;  ///< Interpolation values.
 
   /**
-   * @brief Build the interpolator with the given axis and values.
+   * @brief Build the interpolator with the given values.
    *
-   * @param axis The axis values.
    * @param values The values to interpolate.
    */
-  void build_(
-    const Eigen::Ref<const Eigen::VectorXd> & axis, const std::vector<double> & values) override;
+  void build_impl(const std::vector<double> & values) override;
 
   /**
    * @brief Compute the interpolated value at the given point.
@@ -50,7 +47,7 @@ private:
    * @param s The point at which to compute the interpolated value.
    * @return The interpolated value.
    */
-  double compute_(const double & s) const override;
+  [[nodiscard]] double compute_impl(const double & s) const override;
 
   /**
    * @brief Compute the first derivative at the given point.
@@ -58,7 +55,7 @@ private:
    * @param s The point at which to compute the first derivative.
    * @return The first derivative.
    */
-  double compute_first_derivative_(const double & s) const override;
+  [[nodiscard]] double compute_first_derivative_impl(const double & s) const override;
 
   /**
    * @brief Compute the second derivative at the given point.
@@ -66,7 +63,7 @@ private:
    * @param s The point at which to compute the second derivative.
    * @return The second derivative.
    */
-  double compute_second_derivative_(const double &) const override;
+  [[nodiscard]] double compute_second_derivative_impl(const double &) const override;
 
 public:
   /**
@@ -79,7 +76,7 @@ public:
    *
    * @return The minimum number of required points.
    */
-  size_t minimum_required_points() const override;
+  [[nodiscard]] size_t minimum_required_points() const override;
 };
 
 }  // namespace autoware::motion_utils::trajectory_container::interpolator

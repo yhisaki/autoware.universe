@@ -18,9 +18,8 @@
 #include "autoware/motion_utils/trajectory_container/trajectory/trajectory.hpp"
 #include "autoware/motion_utils/trajectory_container/trajectory/trajectory_path_point.hpp"
 
-#include "tier4_planning_msgs/msg/path_point_with_lane_id.hpp"
+#include <tier4_planning_msgs/msg/path_point_with_lane_id.hpp>
 
-#include <memory>
 #include <vector>
 
 namespace autoware::motion_utils::trajectory_container::trajectory
@@ -67,13 +66,13 @@ public:
    * @param s Arc length
    * @return Path point on the trajectory
    */
-  PathPointWithLaneId compute(const double & s) const;
+  [[nodiscard]] PathPointWithLaneId compute(const double & s) const;
 
   /**
    * @brief Restore the trajectory path points with lane ids
    * @return Vector of path points with lane ids
    */
-  std::vector<PathPointWithLaneId> restore() const;
+  [[nodiscard]] std::vector<PathPointWithLaneId> restore() const;
 
   using detail::CropTrajectoryImpl<TrajectoryContainer<PathPointWithLaneId>>::crop;
   using detail::SetXYZInterpolatorImpl<

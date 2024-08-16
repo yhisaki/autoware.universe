@@ -16,37 +16,28 @@
 
 #include <Eigen/Dense>
 
-#include <algorithm>
 #include <vector>
 
-namespace autoware::motion_utils::trajectory_container::interpolator
-{
-
-namespace detail
+namespace autoware::motion_utils::trajectory_container::interpolator::detail
 {
 
 template <typename T>
-T NearestNeighbor_<T>::compute_(const double & s) const
+T NearestNeighborCommonImpl<T>::compute_impl(const double & s) const
 {
-  auto it = std::lower_bound(this->axis.data(), this->axis.data() + this->axis.size(), s);
-  if (it == this->axis.data()) return this->values[0];
-  if (it == this->axis.data() + this->axis.size()) return this->values[this->axis.size() - 1];
-  if (*it - s < s - *(it - 1)) return this->values[it - this->axis.data()];
-  return this->values[it - this->axis.data() - 1];
+  int idx = this->get_index(s);
+  return (std::abs(s - this->axis_[idx]) <= std::abs(s - this->axis_[idx + 1]))
+           ? this->values_[idx]
+           : this->values_[idx + 1];
 }
 
 template <typename T>
-void NearestNeighbor_<T>::build_(
-  const Eigen::Ref<const Eigen::VectorXd> & axis, const std::vector<T> & values)
+void NearestNeighborCommonImpl<T>::build_impl(const std::vector<T> & values)
 {
-  this->axis = axis;
-  this->values = values;
+  this->values_ = values;
 }
 
 // Explicit template instantiation
-template class NearestNeighbor_<double>;
-template class NearestNeighbor_<std::vector<int64_t>>;
-template class NearestNeighbor_<std::vector<std::vector<int64_t>>>;
-}  // namespace detail
-
-}  // namespace autoware::motion_utils::trajectory_container::interpolator
+template class NearestNeighborCommonImpl<double>;
+template class NearestNeighborCommonImpl<std::vector<int64_t>>;
+template class NearestNeighborCommonImpl<std::vector<std::vector<int64_t>>>;
+}  // namespace autoware::motion_utils::trajectory_container::interpolator::detail
