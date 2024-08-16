@@ -23,6 +23,9 @@ namespace autoware::motion_utils::trajectory_container::detail
 template <typename T>
 RangeSetter<T> ManipulableInterpolatedArray<T>::operator()(const double & start, const double & end)
 {
+  if (start < axis_.front() || end > axis_.back()) {
+    throw std::invalid_argument("Range must be within the axis range.");
+  }
   return RangeSetter<T>{*this, start, end};
 }
 
@@ -87,17 +90,18 @@ RangeSetter<T> & RangeSetter<T>::operator=(const T & value)
 {
   auto & axis = parent_.axis_;
   auto & values = parent_.values_;
+  auto comp = [](const double & a, const double & b) { return a <= b; };
 
   // Insert start if not present
-  auto start_it = std::lower_bound(axis.begin(), axis.end(), start_);
-  if (start_it == axis.end() || *start_it != start_) {
+  auto start_it = std::lower_bound(axis.begin(), axis.end(), start_, comp);
+  if (*start_it != start_) {
     start_it = axis.insert(start_it, start_);
     values.insert(values.begin() + (start_it - axis.begin()), value);
   }
 
   // Insert end if not present
-  auto end_it = std::lower_bound(axis.begin(), axis.end(), end_);
-  if (end_it == axis.end() || *end_it != end_) {
+  auto end_it = std::lower_bound(axis.begin(), axis.end(), end_, comp);
+  if (*end_it != end_) {
     end_it = axis.insert(end_it, end_);
     values.insert(values.begin() + (end_it - axis.begin()), value);
   }

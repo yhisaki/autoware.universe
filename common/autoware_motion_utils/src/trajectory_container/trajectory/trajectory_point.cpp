@@ -68,7 +68,7 @@ void TrajectoryContainer<geometry_msgs::msg::Point>::validate_s(const double & s
 {
   if (s < start_ || s > end_) {
     throw std::out_of_range(
-      fmt::format("The arc length {} is out of the trajectory range [{}, {}]", s, start_, end_));
+      fmt::format("The arc length {:.2f} is out of the trajectory range [{:.2f}, {:.2f}]", s, start_, end_));
   }
 }
 
