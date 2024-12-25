@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(autoware_behavior_path_planner_common)
 
+option(BUILD_EXAMPLES "Build examples" ON)
+
 find_package(autoware_cmake REQUIRED)
 autoware_package()
 
@@ -39,7 +41,7 @@ if(BUILD_TESTING)
   )
 
   target_link_libraries(test_${PROJECT_NAME}_utilities
-  ${PROJECT_NAME}
+    ${PROJECT_NAME}
   )
 
   ament_add_ros_isolated_gmock(test_${PROJECT_NAME}_drivable_area_expansion
@@ -92,6 +94,30 @@ if(BUILD_TESTING)
   target_link_libraries(test_${PROJECT_NAME}_turn_signal
     ${PROJECT_NAME}
   )
+endif()
+
+if(BUILD_EXAMPLES)
+  message(STATUS "Building examples")
+
+  include(FetchContent)
+  fetchcontent_declare(
+    matplotlibcpp17
+    GIT_REPOSITORY https://github.com/soblin/matplotlibcpp17.git
+    GIT_TAG master
+  )
+  fetchcontent_makeavailable(matplotlibcpp17)
+
+  file(GLOB_RECURSE example_files examples/*.cpp)
+
+  foreach(example_file ${example_files})
+    get_filename_component(example_name ${example_file} NAME_WE)
+    ament_auto_add_executable(${example_name} ${example_file})
+    set_source_files_properties(${example_file} PROPERTIES COMPILE_FLAGS -Wno-error -Wno-attributes -Wno-unused-parameter)
+    target_link_libraries(${example_name}
+      ${PROJECT_NAME}
+      matplotlibcpp17::matplotlibcpp17
+    )
+  endforeach()
 endif()
 
 ament_auto_package(INSTALL_TO_SHARE

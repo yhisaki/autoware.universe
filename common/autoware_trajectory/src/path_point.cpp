@@ -14,9 +14,8 @@
 
 #include "autoware/trajectory/path_point.hpp"
 
+#include "autoware/trajectory/detail/helpers.hpp"
 #include "autoware/trajectory/detail/interpolated_array.hpp"
-#include "autoware/trajectory/detail/utils.hpp"
-#include "autoware/trajectory/forward.hpp"
 #include "autoware/trajectory/interpolator/stairstep.hpp"
 #include "autoware/trajectory/pose.hpp"
 
@@ -30,32 +29,13 @@ namespace autoware::trajectory
 using PointType = autoware_planning_msgs::msg::PathPoint;
 
 Trajectory<PointType>::Trajectory()
-: longitudinal_velocity_mps(
-    detail::InterpolatedArray<double>(std::make_shared<interpolator::Stairstep<double>>())),
-  lateral_velocity_mps(
-    detail::InterpolatedArray<double>(std::make_shared<interpolator::Stairstep<double>>())),
-  heading_rate_rps(
-    detail::InterpolatedArray<double>(std::make_shared<interpolator::Stairstep<double>>()))
+: longitudinal_velocity_mps_(std::make_shared<detail::InterpolatedArray<double>>(
+    std::make_shared<interpolator::Stairstep<double>>())),
+  lateral_velocity_mps_(std::make_shared<detail::InterpolatedArray<double>>(
+    std::make_shared<interpolator::Stairstep<double>>())),
+  heading_rate_rps_(std::make_shared<detail::InterpolatedArray<double>>(
+    std::make_shared<interpolator::Stairstep<double>>()))
 {
-}
-
-Trajectory<PointType>::Trajectory(const Trajectory & rhs)
-: Trajectory<geometry_msgs::msg::Pose>(rhs)
-{
-  longitudinal_velocity_mps = rhs.longitudinal_velocity_mps;
-  lateral_velocity_mps = rhs.lateral_velocity_mps;
-  heading_rate_rps = rhs.heading_rate_rps;
-}
-
-Trajectory<PointType> & Trajectory<PointType>::operator=(const Trajectory & rhs)
-{
-  if (this != &rhs) {
-    BaseClass::operator=(rhs);
-    longitudinal_velocity_mps = rhs.longitudinal_velocity_mps;
-    lateral_velocity_mps = rhs.lateral_velocity_mps;
-    heading_rate_rps = rhs.heading_rate_rps;
-  }
-  return *this;
 }
 
 bool Trajectory<PointType>::build(const std::vector<PointType> & points)
@@ -75,9 +55,9 @@ bool Trajectory<PointType>::build(const std::vector<PointType> & points)
   bool is_valid = true;
 
   is_valid &= Trajectory<geometry_msgs::msg::Pose>::build(poses);
-  is_valid &= this->longitudinal_velocity_mps.build(bases_, longitudinal_velocity_mps_values);
-  is_valid &= this->lateral_velocity_mps.build(bases_, lateral_velocity_mps_values);
-  is_valid &= this->heading_rate_rps.build(bases_, heading_rate_rps_values);
+  is_valid &= this->longitudinal_velocity_mps().build(bases_, longitudinal_velocity_mps_values);
+  is_valid &= this->lateral_velocity_mps().build(bases_, lateral_velocity_mps_values);
+  is_valid &= this->heading_rate_rps().build(bases_, heading_rate_rps_values);
 
   return is_valid;
 }
@@ -90,8 +70,8 @@ std::vector<double> Trajectory<PointType>::get_internal_bases() const
   };
 
   auto bases = detail::merge_vectors(
-    bases_, get_bases(this->longitudinal_velocity_mps), get_bases(this->lateral_velocity_mps),
-    get_bases(this->heading_rate_rps));
+    bases_, get_bases(this->longitudinal_velocity_mps()), get_bases(this->lateral_velocity_mps()),
+    get_bases(this->heading_rate_rps()));
 
   bases = detail::crop_bases(bases, start_, end_);
   std::transform(
@@ -104,9 +84,10 @@ PointType Trajectory<PointType>::compute(double s) const
   PointType result;
   result.pose = Trajectory<geometry_msgs::msg::Pose>::compute(s);
   s = clamp(s);
-  result.longitudinal_velocity_mps = static_cast<float>(this->longitudinal_velocity_mps.compute(s));
-  result.lateral_velocity_mps = static_cast<float>(this->lateral_velocity_mps.compute(s));
-  result.heading_rate_rps = static_cast<float>(this->heading_rate_rps.compute(s));
+  result.longitudinal_velocity_mps =
+    static_cast<float>(this->longitudinal_velocity_mps().compute(s));
+  result.lateral_velocity_mps = static_cast<float>(this->lateral_velocity_mps().compute(s));
+  result.heading_rate_rps = static_cast<float>(this->heading_rate_rps().compute(s));
   return result;
 }
 

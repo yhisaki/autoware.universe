@@ -54,41 +54,19 @@ public:
   {
   }
 
-  /**
-   * @brief Copy constructor.
-   * @param other The InterpolatedArray to copy from.
-   */
-  InterpolatedArray(const InterpolatedArray & other)
-  : bases_(other.bases_), values_(other.values_), interpolator_(other.interpolator_->clone())
-  {
-  }
-
+  InterpolatedArray(const InterpolatedArray & other) = default;
   InterpolatedArray(InterpolatedArray && other) = default;
+  InterpolatedArray & operator=(InterpolatedArray && other) = default;
+  InterpolatedArray & operator=(const InterpolatedArray & other) = default;
 
   bool build(const std::vector<double> & bases, const std::vector<T> & values)
   {
     bases_ = bases;
     values_ = values;
+    if (interpolator_.use_count() > 1) {
+      interpolator_ = interpolator_->clone();
+    }
     return interpolator_->build(bases_, values_);
-  }
-
-  /**
-   * @brief Move constructor.
-   * @param other The InterpolatedArray to move from.
-   */
-  InterpolatedArray & operator=(InterpolatedArray && other) = default;
-
-  /**
-   * @brief Copy assignment operator.
-   * @param other The InterpolatedArray to copy from.
-   * @return Reference to this InterpolatedArray.
-   */
-  InterpolatedArray & operator=(const InterpolatedArray & other)
-  {
-    bases_ = other.bases_;
-    values_ = other.values_;
-    interpolator_ = other.interpolator_->clone();
-    return *this;
   }
 
   // Destructor
@@ -153,8 +131,6 @@ public:
       std::fill(values.begin() + start_index, values.begin() + end_index + 1, value);
 
       parent_.interpolator_->build(bases, values);
-
-      // return *this;
     }
   };
 

@@ -39,29 +39,6 @@ Trajectory<PointType>::Trajectory()
 {
 }
 
-Trajectory<PointType>::Trajectory(const Trajectory & rhs)
-{
-  x_interpolator_ = rhs.x_interpolator_->clone();
-  y_interpolator_ = rhs.y_interpolator_->clone();
-  z_interpolator_ = rhs.z_interpolator_->clone();
-  bases_ = rhs.bases_;
-  start_ = rhs.start_;
-  end_ = rhs.end_;
-}
-
-Trajectory<PointType> & Trajectory<PointType>::operator=(const Trajectory & rhs)
-{
-  if (this != &rhs) {
-    x_interpolator_ = rhs.x_interpolator_->clone();
-    y_interpolator_ = rhs.y_interpolator_->clone();
-    z_interpolator_ = rhs.z_interpolator_->clone();
-    bases_ = rhs.bases_;
-    start_ = rhs.start_;
-    end_ = rhs.end_;
-  }
-  return *this;
-}
-
 bool Trajectory<PointType>::build(const std::vector<PointType> & points)
 {
   std::vector<double> xs;
@@ -86,6 +63,15 @@ bool Trajectory<PointType>::build(const std::vector<PointType> & points)
   end_ = bases_.back();
 
   bool is_valid = true;
+  if (x_interpolator_.use_count() > 1) {
+    x_interpolator_ = x_interpolator_->clone();
+  }
+  if (y_interpolator_.use_count() > 1) {
+    y_interpolator_ = y_interpolator_->clone();
+  }
+  if (z_interpolator_.use_count() > 1) {
+    z_interpolator_ = z_interpolator_->clone();
+  }
   is_valid &= x_interpolator_->build(bases_, xs);
   is_valid &= y_interpolator_->build(bases_, ys);
   is_valid &= z_interpolator_->build(bases_, zs);
@@ -169,25 +155,25 @@ void Trajectory<PointType>::crop(const double & start, const double & length)
   end_ = std::clamp(start_ + length, start_, end_);
 }
 
-std::vector<std::pair<double, double>> Trajectory<PointType>::get_segments(
-  const ConstraintFunction & constraints) const
-{
-  std::vector<std::pair<double, double>> segments;
-  auto bases = get_internal_bases();
-  bool segment_start = false;
-  for (const double & s : bases) {
-    if (constraints(s)) {
-      if (!segment_start) {
-        segments.emplace_back(s, s);
-        segment_start = true;
-      } else {
-        segments.back().second = s;
-      }
-    } else {
-      segment_start = false;
-    }
-  }
-  return segments;
-}
+// std::vector<std::pair<double, double>> Trajectory<PointType>::get_segments(
+//   const ConstraintFunction & constraints) const
+// {
+//   std::vector<std::pair<double, double>> segments;
+//   auto bases = get_internal_bases();
+//   bool segment_start = false;
+//   for (const double & s : bases) {
+//     if (constraints(s)) {
+//       if (!segment_start) {
+//         segments.emplace_back(s, s);
+//         segment_start = true;
+//       } else {
+//         segments.back().second = s;
+//       }
+//     } else {
+//       segment_start = false;
+//     }
+//   }
+//   return segments;
+// }
 
 }  // namespace autoware::trajectory

@@ -14,6 +14,7 @@
 
 #include "autoware/trajectory/pose.hpp"
 
+#include "autoware/trajectory/detail/helpers.hpp"
 #include "autoware/trajectory/interpolator/spherical_linear.hpp"
 
 #include <tf2/LinearMath/Quaternion.h>
@@ -28,21 +29,6 @@ using PointType = geometry_msgs::msg::Pose;
 Trajectory<PointType>::Trajectory()
 : orientation_interpolator_(std::make_shared<interpolator::SphericalLinear>())
 {
-}
-
-Trajectory<PointType>::Trajectory(const Trajectory & rhs)
-: Trajectory<geometry_msgs::msg::Point>(rhs)
-{
-  orientation_interpolator_ = rhs.orientation_interpolator_->clone();
-}
-
-Trajectory<PointType> & Trajectory<PointType>::operator=(const Trajectory & rhs)
-{
-  if (this != &rhs) {
-    BaseClass::operator=(rhs);
-    orientation_interpolator_ = rhs.orientation_interpolator_->clone();
-  }
-  return *this;
 }
 
 bool Trajectory<PointType>::build(const std::vector<PointType> & points)

@@ -12,36 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef AUTOWARE__TRAJECTORY__DETAIL__UTILS_HPP_
-#define AUTOWARE__TRAJECTORY__DETAIL__UTILS_HPP_
+#ifndef AUTOWARE__TRAJECTORY__DETAIL__HELPERS_HPP_
+#define AUTOWARE__TRAJECTORY__DETAIL__HELPERS_HPP_
 
-#include "lanelet2_core/primitives/Point.h"
-
-#include <Eigen/Core>
-
-#include <autoware_planning_msgs/msg/path_point.hpp>
-#include <geometry_msgs/msg/point.hpp>
-#include <geometry_msgs/msg/pose.hpp>
-#include <tier4_planning_msgs/msg/path_point_with_lane_id.hpp>
-
+#include <cstddef>
 #include <set>
 #include <vector>
 
 namespace autoware::trajectory::detail
 {
-/**
- * @brief Convert various point types to geometry_msgs::msg::Point.
- * @param p The input point to be converted.
- * @return geometry_msgs::msg::Point The converted point.
- */
-geometry_msgs::msg::Point to_point(const geometry_msgs::msg::Point & p);
-geometry_msgs::msg::Point to_point(const geometry_msgs::msg::Pose & p);
-geometry_msgs::msg::Point to_point(const Eigen::Vector2d & p);
-geometry_msgs::msg::Point to_point(const autoware_planning_msgs::msg::PathPoint & p);
-geometry_msgs::msg::Point to_point(const tier4_planning_msgs::msg::PathPointWithLaneId & p);
-geometry_msgs::msg::Point to_point(const lanelet::BasicPoint2d & p);
-geometry_msgs::msg::Point to_point(const lanelet::ConstPoint3d & p);
-
+inline namespace helpers
+{
 /**
  * @brief Merge multiple vectors into one, keeping only unique elements.
  * @tparam Vectors Variadic template parameter for vector types.
@@ -85,7 +66,7 @@ std::vector<double> fill_bases(const std::vector<double> & x, const size_t & min
 
 std::vector<double> crop_bases(
   const std::vector<double> & x, const double & start, const double & end);
-
+}  // namespace helpers
 }  // namespace autoware::trajectory::detail
 
-#endif  // AUTOWARE__TRAJECTORY__DETAIL__UTILS_HPP_
+#endif  // AUTOWARE__TRAJECTORY__DETAIL__HELPERS_HPP_

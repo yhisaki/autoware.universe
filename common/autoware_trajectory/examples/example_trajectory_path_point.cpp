@@ -13,6 +13,8 @@
 // limitations under the License.
 
 #include "autoware/trajectory/path_point.hpp"
+#include "autoware/trajectory/utils/crossed.hpp"
+#include "lanelet2_core/primitives/LineString.h"
 
 #include <autoware_planning_msgs/msg/path_point.hpp>
 #include <geometry_msgs/msg/point.hpp>
@@ -76,8 +78,15 @@ int main()
   p2.x = 10.2;
   p2.y = 7.7;
 
-  auto s = trajectory->crossed(p1, p2);
-  auto crossed = trajectory->compute(s.value());
+  lanelet::LineString2d line_string;
+
+  for (const auto & p : line_string) {
+    lanelet::BasicPoint2d point(p.x(), p.y());
+    // line_string.push_back(point);
+  }
+
+  auto s = autoware::trajectory::crossed(*trajectory, line_string);
+  auto crossed = trajectory->compute(s.at(0));
 
   plt.plot(
     Args(std::vector<double>{p1.x, p2.x}, std::vector<double>{p1.y, p2.y}),
@@ -87,7 +96,7 @@ int main()
     Args(crossed.pose.position.x, crossed.pose.position.y),
     Kwargs("label"_a = "Crossed on trajectory", "color"_a = "purple"));
 
-  trajectory->longitudinal_velocity_mps.range(s.value(), trajectory->length()).set(0.0);
+  trajectory->longitudinal_velocity_mps().range(s.at(0), trajectory->length()).set(0.0);
 
   std::vector<double> x;
   std::vector<double> y;

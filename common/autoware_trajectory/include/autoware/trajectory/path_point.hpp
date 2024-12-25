@@ -16,7 +16,10 @@
 #define AUTOWARE__TRAJECTORY__PATH_POINT_HPP_
 
 #include "autoware/trajectory/detail/interpolated_array.hpp"
+#include "autoware/trajectory/forward.hpp"
 #include "autoware/trajectory/pose.hpp"
+
+#include <autoware_planning_msgs/msg/path_point.hpp>
 
 #include <memory>
 #include <utility>
@@ -31,21 +34,63 @@ class Trajectory<autoware_planning_msgs::msg::PathPoint>
   using BaseClass = Trajectory<geometry_msgs::msg::Pose>;
   using PointType = autoware_planning_msgs::msg::PathPoint;
 
-protected:
-  [[nodiscard]] std::vector<double> get_internal_bases() const override;
+  std::shared_ptr<detail::InterpolatedArray<double>>
+    longitudinal_velocity_mps_;  //!< Longitudinal velocity in m/s
+  std::shared_ptr<detail::InterpolatedArray<double>>
+    lateral_velocity_mps_;  //!< Lateral velocity in m/s
+  std::shared_ptr<detail::InterpolatedArray<double>>
+    heading_rate_rps_;  //!< Heading rate in rad/s};
 
 public:
-  detail::InterpolatedArray<double> longitudinal_velocity_mps{
-    nullptr};  //!< Longitudinal velocity in m/s
-  detail::InterpolatedArray<double> lateral_velocity_mps{nullptr};  //!< Lateral velocity in m/s
-  detail::InterpolatedArray<double> heading_rate_rps{nullptr};      //!< Heading rate in rad/s};
-
   Trajectory();
   ~Trajectory() override = default;
-  Trajectory(const Trajectory & rhs);
+  Trajectory(const Trajectory & rhs) = default;
   Trajectory(Trajectory && rhs) = default;
-  Trajectory & operator=(const Trajectory & rhs);
+  Trajectory & operator=(const Trajectory & rhs) = default;
   Trajectory & operator=(Trajectory && rhs) = default;
+
+  [[nodiscard]] std::vector<double> get_internal_bases() const override;
+
+  detail::InterpolatedArray<double> & longitudinal_velocity_mps()
+  {
+    if (longitudinal_velocity_mps_.use_count() > 1) {
+      longitudinal_velocity_mps_ =
+        std::make_shared<detail::InterpolatedArray<double>>(*longitudinal_velocity_mps_);
+    }
+    return *longitudinal_velocity_mps_;
+  }
+
+  detail::InterpolatedArray<double> & lateral_velocity_mps()
+  {
+    if (lateral_velocity_mps_.use_count() > 1) {
+      lateral_velocity_mps_ =
+        std::make_shared<detail::InterpolatedArray<double>>(*lateral_velocity_mps_);
+    }
+    return *lateral_velocity_mps_;
+  }
+
+  detail::InterpolatedArray<double> & heading_rate_rps()
+  {
+    if (heading_rate_rps_.use_count() > 1) {
+      heading_rate_rps_ = std::make_shared<detail::InterpolatedArray<double>>(*heading_rate_rps_);
+    }
+    return *heading_rate_rps_;
+  }
+
+  [[nodiscard]] const detail::InterpolatedArray<double> & longitudinal_velocity_mps() const
+  {
+    return *longitudinal_velocity_mps_;
+  }
+
+  [[nodiscard]] const detail::InterpolatedArray<double> & lateral_velocity_mps() const
+  {
+    return *lateral_velocity_mps_;
+  }
+
+  [[nodiscard]] const detail::InterpolatedArray<double> & heading_rate_rps() const
+  {
+    return *heading_rate_rps_;
+  }
 
   /**
    * @brief Build the trajectory from the points
@@ -105,7 +150,7 @@ public:
     template <class InterpolatorType, class... Args>
     Builder & set_longitudinal_velocity_interpolator(Args &&... args)
     {
-      trajectory_->longitudinal_velocity_mps = detail::InterpolatedArray<double>(
+      trajectory_->longitudinal_velocity_mps_ = std::make_shared<detail::InterpolatedArray<double>>(
         std::make_shared<InterpolatorType>(std::forward<Args>(args)...));
       return *this;
     }
@@ -113,7 +158,7 @@ public:
     template <class InterpolatorType, class... Args>
     Builder & set_lateral_velocity_interpolator(Args &&... args)
     {
-      trajectory_->lateral_velocity_mps = detail::InterpolatedArray<double>(
+      trajectory_->lateral_velocity_mps_ = std::make_shared<detail::InterpolatedArray<double>>(
         std::make_shared<InterpolatorType>(std::forward<Args>(args)...));
       return *this;
     }
@@ -121,7 +166,7 @@ public:
     template <class InterpolatorType, class... Args>
     Builder & set_heading_rate_interpolator(Args &&... args)
     {
-      trajectory_->heading_rate_rps = detail::InterpolatedArray<double>(
+      trajectory_->heading_rate_rps_ = std::make_shared<detail::InterpolatedArray<double>>(
         std::make_shared<InterpolatorType>(std::forward<Args>(args)...));
       return *this;
     }

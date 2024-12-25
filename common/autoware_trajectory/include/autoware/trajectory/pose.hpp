@@ -18,7 +18,7 @@
 #include "autoware/trajectory/interpolator/interpolator.hpp"
 #include "autoware/trajectory/point.hpp"
 
-#include <geometry_msgs/msg/detail/point__struct.hpp>
+#include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/quaternion.hpp>
 
 #include <memory>
@@ -41,17 +41,17 @@ protected:
   std::shared_ptr<interpolator::InterpolatorInterface<geometry_msgs::msg::Quaternion>>
     orientation_interpolator_;  //!< Interpolator for orientations
 
-  [[nodiscard]] std::vector<double> get_internal_bases() const override;
-
 public:
   Trajectory();
   ~Trajectory() override = default;
-  Trajectory(const Trajectory & rhs);
+  Trajectory(const Trajectory & rhs) = default;
   Trajectory(Trajectory && rhs) = default;
-  Trajectory & operator=(const Trajectory & rhs);
+  Trajectory & operator=(const Trajectory & rhs) = default;
   Trajectory & operator=(Trajectory && rhs) = default;
 
   bool build(const std::vector<PointType> & points);
+
+  [[nodiscard]] std::vector<double> get_internal_bases() const override;
 
   /**
    * @brief Compute the pose on the trajectory at a given s value

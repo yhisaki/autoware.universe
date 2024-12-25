@@ -26,22 +26,22 @@ namespace autoware::trajectory
 using PointType = tier4_planning_msgs::msg::PathPointWithLaneId;
 
 Trajectory<PointType>::Trajectory()
-: lane_ids(
-    detail::InterpolatedArray<LaneIdType>(std::make_shared<interpolator::Stairstep<LaneIdType>>()))
+: lane_ids_(std::make_shared<detail::InterpolatedArray<LaneIdType>>(
+    std::make_shared<interpolator::Stairstep<LaneIdType>>()))
 {
 }
 
 Trajectory<PointType>::Trajectory(const Trajectory & rhs)
 : Trajectory<autoware_planning_msgs::msg::PathPoint>(rhs)
 {
-  lane_ids = rhs.lane_ids;
+  lane_ids_ = std::make_shared<detail::InterpolatedArray<LaneIdType>>(this->lane_ids());
 }
 
 Trajectory<PointType> & Trajectory<PointType>::operator=(const Trajectory & rhs)
 {
   if (this != &rhs) {
     BaseClass::operator=(rhs);
-    lane_ids = rhs.lane_ids;
+    lane_ids_ = std::make_shared<detail::InterpolatedArray<LaneIdType>>(this->lane_ids());
   }
   return *this;
 }
@@ -57,7 +57,7 @@ bool Trajectory<PointType>::build(const std::vector<PointType> & points)
   }
   bool is_valid = true;
   is_valid &= BaseClass::build(path_points);
-  is_valid &= lane_ids.build(bases_, lane_ids_values);
+  is_valid &= lane_ids().build(bases_, lane_ids_values);
   return is_valid;
 }
 
@@ -69,8 +69,8 @@ std::vector<double> Trajectory<PointType>::get_internal_bases() const
   };
 
   auto bases = detail::merge_vectors(
-    bases_, get_bases(this->longitudinal_velocity_mps), get_bases(this->lateral_velocity_mps),
-    get_bases(this->heading_rate_rps), get_bases(this->lane_ids));
+    bases_, get_bases(this->longitudinal_velocity_mps()), get_bases(this->lateral_velocity_mps()),
+    get_bases(this->heading_rate_rps()), get_bases(this->lane_ids()));
 
   bases = detail::crop_bases(bases, start_, end_);
 
@@ -84,7 +84,7 @@ PointType Trajectory<PointType>::compute(double s) const
   PointType result;
   result.point = BaseClass::compute(s);
   s = clamp(s);
-  result.lane_ids = lane_ids.compute(s);
+  result.lane_ids = lane_ids().compute(s);
   return result;
 }
 

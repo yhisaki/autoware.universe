@@ -15,7 +15,6 @@
 #ifndef AUTOWARE__TRAJECTORY__POINT_HPP_
 #define AUTOWARE__TRAJECTORY__POINT_HPP_
 
-#include "autoware/trajectory/detail/utils.hpp"
 #include "autoware/trajectory/forward.hpp"
 #include "autoware/trajectory/interpolator/interpolator.hpp"
 
@@ -23,9 +22,7 @@
 
 #include <geometry_msgs/msg/point.hpp>
 
-#include <algorithm>
 #include <cstddef>
-#include <functional>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -41,8 +38,6 @@ class Trajectory<geometry_msgs::msg::Point>
 {
   using PointType = geometry_msgs::msg::Point;
 
-  friend class Trajectory<geometry_msgs::msg::Pose>;
-
 protected:
   std::shared_ptr<interpolator::InterpolatorInterface<double>>
     x_interpolator_;  //!< Interpolator for x
@@ -55,24 +50,21 @@ protected:
 
   double start_{0.0}, end_{0.0};  //!< Start and end of the arc length of the trajectory
 
-  using ConstraintFunction = std::function<bool(const double & s)>;
-
   /**
    * @brief Validate the arc length is within the trajectory
    * @param s Arc length
    */
   [[nodiscard]] double clamp(const double & s, bool show_warning = false) const;
 
-  [[nodiscard]] virtual std::vector<double> get_internal_bases() const;
-
 public:
   Trajectory();
   virtual ~Trajectory() = default;
-  Trajectory(const Trajectory & rhs);
+  Trajectory(const Trajectory & rhs) = default;
   Trajectory(Trajectory && rhs) = default;
-  Trajectory & operator=(const Trajectory & rhs);
+  Trajectory & operator=(const Trajectory & rhs) = default;
   Trajectory & operator=(Trajectory && rhs) = default;
 
+  [[nodiscard]] virtual std::vector<double> get_internal_bases() const;
   /**
    * @brief Get the length of the trajectory
    * @return Length of the trajectory
@@ -114,144 +106,19 @@ public:
    */
   [[nodiscard]] double curvature(double s) const;
 
-  /**
-   * @brief Find the closest point with constraint
-   * @tparam InputPointType Type of input point
-   * @param p Input point
-   * @param constraints Constraint function
-   * @return Optional arc length of the closest point
-   */
-  template <typename InputPointType>
-  [[nodiscard]] std::optional<double> closest_with_constraint(
-    const InputPointType & p, const ConstraintFunction & constraints) const
-  {
-    using trajectory::detail::to_point;
-    Eigen::Vector2d point(to_point(p).x, to_point(p).y);
-    std::vector<double> distances_from_segments;
-    std::vector<double> lengths_from_start_points;
-
-    auto bases = get_internal_bases();
-
-    for (size_t i = 1; i < bases.size(); ++i) {
-      Eigen::Vector2d p0;
-      Eigen::Vector2d p1;
-
-      auto p0_tmp = compute(bases.at(i - 1));
-      auto p1_tmp = compute(bases.at(i));
-
-      p0 << p0_tmp.x, p0_tmp.y;
-      p1 << p1_tmp.x, p1_tmp.y;
-
-      Eigen::Vector2d v = p1 - p0;
-      Eigen::Vector2d w = point - p0;
-      double c1 = w.dot(v);
-      double c2 = v.dot(v);
-      double length_from_start_point = NAN;
-      double distance_from_segment = NAN;
-      if (c1 <= 0) {
-        length_from_start_point = bases.at(i - 1);
-        distance_from_segment = (point - p0).norm();
-      } else if (c2 <= c1) {
-        length_from_start_point = bases.at(i);
-        distance_from_segment = (point - p1).norm();
-      } else {
-        length_from_start_point = bases.at(i - 1) + c1 / c2 * (p1 - p0).norm();
-        distance_from_segment = (point - (p0 + (c1 / c2) * v)).norm();
-      }
-      if (constraints(length_from_start_point)) {
-        distances_from_segments.push_back(distance_from_segment);
-        lengths_from_start_points.push_back(length_from_start_point);
-      }
-    }
-    if (distances_from_segments.empty()) {
-      return std::nullopt;
-    }
-
-    auto min_it = std::min_element(distances_from_segments.begin(), distances_from_segments.end());
-
-    return lengths_from_start_points[std::distance(distances_from_segments.begin(), min_it)];
-  }
-
-  /**
-   * @brief Find the closest point
-   * @tparam InputPointType Type of input point
-   * @param p Input point
-   * @return Arc length of the closest point
-   */
-  template <typename InputPointType>
-  [[nodiscard]] double closest(const InputPointType & p) const
-  {
-    auto s = closest_with_constraint(p, [](const double &) { return true; });
-    return *s;
-  }
-  /**
-   * @brief Find the point where Trajectory and line cross and satisfy the constraint.
-   * @tparam InputPointType Type of input point
-   * @param start Start point
-   * @param end End point
-   * @param constraints Constraint function
-   * @return Optional arc length of the crossing point
-   */
-  template <typename InputPointType>
-  [[nodiscard]] std::optional<double> crossed_with_constraint(
-    const InputPointType & start, const InputPointType & end,
-    const ConstraintFunction & constraints) const
-  {
-    using trajectory::detail::to_point;
-    Eigen::Vector2d line_start(to_point(start).x, to_point(start).y);
-    Eigen::Vector2d line_end(to_point(end).x, to_point(end).y);
-    Eigen::Vector2d line_dir = line_end - line_start;
-
-    auto bases = get_internal_bases();
-
-    for (size_t i = 1; i < bases.size(); ++i) {
-      Eigen::Vector2d p0;
-      Eigen::Vector2d p1;
-
-      auto p0_tmp = compute(bases.at(i - 1));
-      auto p1_tmp = compute(bases.at(i));
-
-      p0 << p0_tmp.x, p0_tmp.y;
-      p1 << p1_tmp.x, p1_tmp.y;
-
-      Eigen::Vector2d segment_dir = p1 - p0;
-
-      double det = segment_dir.x() * line_dir.y() - segment_dir.y() * line_dir.x();
-
-      if (std::abs(det) < 1e-10) {
-        continue;
-      }
-
-      Eigen::Vector2d p0_to_line_start = line_start - p0;
-
-      double t = (p0_to_line_start.x() * line_dir.y() - p0_to_line_start.y() * line_dir.x()) / det;
-      double u =
-        (p0_to_line_start.x() * segment_dir.y() - p0_to_line_start.y() * segment_dir.x()) / det;
-
-      if (t >= 0.0 && t <= 1.0 && u >= 0.0 && u <= 1.0) {
-        double intersection_s = bases.at(i - 1) + t * (bases.at(i) - bases.at(i - 1));
-        if (constraints(intersection_s)) {
-          return intersection_s;
-        }
-      }
-    }
-
-    return std::nullopt;
-  }
-
-  /**
-   * @brief Find the point where Trajectory and line cross.
-   * @tparam InputPointType Type of input point
-   * @param start Start point of the line
-   * @param end End point of the line
-   * @return Optional arc length of the crossing point
-   */
-  template <typename InputPointType>
-  [[nodiscard]] std::optional<double> crossed(
-    const InputPointType & start, const InputPointType & end) const
-  {
-    return crossed_with_constraint(start, end, [](const double &) { return true; });
-  }
+  // /**
+  //  * @brief Find the point where Trajectory and line cross.
+  //  * @tparam InputPointType Type of input point
+  //  * @param start Start point of the line
+  //  * @param end End point of the line
+  //  * @return Optional arc length of the crossing point
+  //  */
+  // template <typename InputPointType>
+  // [[nodiscard]] std::optional<double> crossed(
+  //   const InputPointType & start, const InputPointType & end) const
+  // {
+  //   return crossed_with_constraint(start, end, [](const double &) { return true; });
+  // }
 
   /**
    * @brief Restore the trajectory points
@@ -262,20 +129,20 @@ public:
 
   void crop(const double & start, const double & length);
 
-  /**
-   * @brief Extracts segments from the trajectory based on the given constraints.
-   *
-   * This function iterates through the internal bases of the trajectory and applies the provided
-   * constraint function to determine valid segments. A segment is defined as a continuous range
-   * of points that satisfy the constraint function.
-   *
-   * @param constraints A function that takes a double value and returns a boolean indicating
-   *                    whether the value satisfies the constraints.
-   * @return A vector of pairs, where each pair represents the start and end points of a segment
-   *         that satisfies the constraints.
-   */
-  [[nodiscard]] std::vector<std::pair<double, double>> get_segments(
-    const ConstraintFunction & constraints) const;
+  // /**
+  //  * @brief Extracts segments from the trajectory based on the given constraints.
+  //  *
+  //  * This function iterates through the internal bases of the trajectory and applies the provided
+  //  * constraint function to determine valid segments. A segment is defined as a continuous range
+  //  * of points that satisfy the constraint function.
+  //  *
+  //  * @param constraints A function that takes a double value and returns a boolean indicating
+  //  *                    whether the value satisfies the constraints.
+  //  * @return A vector of pairs, where each pair represents the start and end points of a segment
+  //  *         that satisfies the constraints.
+  //  */
+  // [[nodiscard]] std::vector<std::pair<double, double>> get_segments(
+  //   const ConstraintFunction & constraints) const;
 
   class Builder
   {

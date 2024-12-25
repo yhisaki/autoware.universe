@@ -15,10 +15,16 @@
 #include "scene.hpp"
 
 #include "autoware/behavior_velocity_planner_common/utilization/util.hpp"
+#include "autoware/trajectory/utils/closest.hpp"
 
 #include <rclcpp/logging.hpp>
 
 #include <tier4_planning_msgs/msg/path_with_lane_id.hpp>
+
+#include <boost/geometry/algorithms/detail/intersects/interface.hpp>
+
+#include <Eigen/src/Core/Matrix.h>
+#include <lanelet2_core/primitives/LineString.h>
 
 #include <optional>
 #include <utility>
@@ -55,7 +61,7 @@ bool StopLineModule::modifyPathVelocity(PathWithLaneId * path)
     return true;
   }
 
-  trajectory->longitudinal_velocity_mps.range(*stop_point, trajectory->length()).set(0.0);
+  trajectory->longitudinal_velocity_mps().range(*stop_point, trajectory->length()).set(0.0);
 
   path->points = trajectory->restore();
 
@@ -75,12 +81,17 @@ std::pair<double, std::optional<double>> StopLineModule::getEgoAndStopPoint(
   const Trajectory & trajectory, const geometry_msgs::msg::Pose & ego_pose,
   const State & state) const
 {
-  const double ego_s = trajectory.closest(ego_pose.position);
+  const double ego_s = autoware::trajectory::closest(trajectory, ego_pose);
   std::optional<double> stop_point_s;
 
   switch (state) {
     case State::APPROACH: {
       const double base_link2front = planner_data_->vehicle_info_.max_longitudinal_offset_m;
+
+      lanelet::BasicLineString3d line_string = stop_line_.basicLineString();
+
+      boost::geometry::intersects(line_string, line_string);
+
       const LineString2d stop_line = planning_utils::extendLine(
         stop_line_[0], stop_line_[1], planner_data_->stop_line_extend_length);
 

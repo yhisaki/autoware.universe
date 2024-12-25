@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "autoware/trajectory/detail/utils.hpp"
+#include "autoware/trajectory/detail/helpers.hpp"
 
 #include <gtest/gtest.h>
 
-TEST(TestUtils, fill_bases)
+TEST(TestHelpers, fill_bases)
 {
   using autoware::trajectory::detail::fill_bases;
 

@@ -33,12 +33,9 @@ class Trajectory<tier4_planning_msgs::msg::PathPointWithLaneId>
   using PointType = tier4_planning_msgs::msg::PathPointWithLaneId;
   using LaneIdType = std::vector<int64_t>;
 
-protected:
-  [[nodiscard]] std::vector<double> get_internal_bases() const override;
+  std::shared_ptr<detail::InterpolatedArray<LaneIdType>> lane_ids_;  //!< Lane ID
 
 public:
-  detail::InterpolatedArray<LaneIdType> lane_ids{nullptr};  //!< Lane ID
-
   Trajectory();
   ~Trajectory() override = default;
   Trajectory(const Trajectory & rhs);
@@ -46,12 +43,27 @@ public:
   Trajectory & operator=(const Trajectory & rhs);
   Trajectory & operator=(Trajectory && rhs) = default;
 
+  detail::InterpolatedArray<LaneIdType> & lane_ids()
+  {
+    if (lane_ids_.use_count() > 1) {
+      lane_ids_ = std::make_shared<detail::InterpolatedArray<LaneIdType>>(this->lane_ids());
+    }
+    return *lane_ids_;
+  }
+
+  [[nodiscard]] const detail::InterpolatedArray<LaneIdType> & lane_ids() const
+  {
+    return *lane_ids_;
+  }
+
   /**
    * @brief Build the trajectory from the points
    * @param points Vector of points
    * @return True if the build is successful
    */
   bool build(const std::vector<PointType> & points);
+
+  [[nodiscard]] std::vector<double> get_internal_bases() const override;
 
   /**
    * @brief Compute the point on the trajectory at a given s value
@@ -104,7 +116,7 @@ public:
     template <class InterpolatorType, class... Args>
     Builder & set_longitudinal_velocity_interpolator(Args &&... args)
     {
-      trajectory_->longitudinal_velocity_mps = detail::InterpolatedArray<double>(
+      trajectory_->longitudinal_velocity_mps_ = std::make_shared<detail::InterpolatedArray<double>>(
         std::make_shared<InterpolatorType>(std::forward<Args>(args)...));
       return *this;
     }
@@ -112,7 +124,7 @@ public:
     template <class InterpolatorType, class... Args>
     Builder & set_lateral_velocity_interpolator(Args &&... args)
     {
-      trajectory_->lateral_velocity_mps = detail::InterpolatedArray<double>(
+      trajectory_->lateral_velocity_mps_ = std::make_shared<detail::InterpolatedArray<double>>(
         std::make_shared<InterpolatorType>(std::forward<Args>(args)...));
       return *this;
     }
@@ -120,7 +132,7 @@ public:
     template <class InterpolatorType, class... Args>
     Builder & set_heading_rate_interpolator(Args &&... args)
     {
-      trajectory_->heading_rate_rps = detail::InterpolatedArray<double>(
+      trajectory_->heading_rate_rps_ = std::make_shared<detail::InterpolatedArray<double>>(
         std::make_shared<InterpolatorType>(std::forward<Args>(args)...));
       return *this;
     }
@@ -128,7 +140,7 @@ public:
     template <class InterpolatorType, class... Args>
     Builder & set_lane_ids_interpolator(Args &&... args)
     {
-      trajectory_->lane_ids = detail::InterpolatedArray<LaneIdType>(
+      trajectory_->lane_ids_ = std::make_shared<detail::InterpolatedArray<LaneIdType>>(
         std::make_shared<InterpolatorType>(std::forward<Args>(args)...));
       return *this;
     }

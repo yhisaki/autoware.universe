@@ -20,56 +20,6 @@
 namespace autoware::trajectory::detail
 {
 
-geometry_msgs::msg::Point to_point(const geometry_msgs::msg::Point & p)
-{
-  return p;
-}
-
-geometry_msgs::msg::Point to_point(const geometry_msgs::msg::Pose & p)
-{
-  return p.position;
-}
-
-geometry_msgs::msg::Point to_point(const Eigen::Vector2d & p)
-{
-  geometry_msgs::msg::Point point;
-  point.x = p(0);
-  point.y = p(1);
-  return point;
-}
-
-geometry_msgs::msg::Point to_point(const autoware_planning_msgs::msg::PathPoint & p)
-{
-  geometry_msgs::msg::Point point;
-  point.x = p.pose.position.x;
-  point.y = p.pose.position.y;
-  return point;
-}
-
-geometry_msgs::msg::Point to_point(const tier4_planning_msgs::msg::PathPointWithLaneId & p)
-{
-  geometry_msgs::msg::Point point;
-  point.x = p.point.pose.position.x;
-  point.y = p.point.pose.position.y;
-  return point;
-}
-
-geometry_msgs::msg::Point to_point(const lanelet::BasicPoint2d & p)
-{
-  geometry_msgs::msg::Point point;
-  point.x = p.x();
-  point.y = p.y();
-  return point;
-}
-
-geometry_msgs::msg::Point to_point(const lanelet::ConstPoint3d & p)
-{
-  geometry_msgs::msg::Point point;
-  point.x = p.x();
-  point.y = p.y();
-  return point;
-}
-
 std::vector<double> fill_bases(const std::vector<double> & x, const size_t & min_points)
 {
   const auto original_size = x.size();
