@@ -14,6 +14,8 @@
 
 #include "autoware/trajectory/utils/crossed.hpp"
 
+#include <boost/iterator/zip_iterator.hpp>
+
 #include <optional>
 
 namespace autoware::trajectory::detail::impl
@@ -46,9 +48,9 @@ std::optional<double> crossed_with_constraint_impl(
       (p0_to_line_start.x() * segment_dir.y() - p0_to_line_start.y() * segment_dir.x()) / det;
 
     if (t >= 0.0 && t <= 1.0 && u >= 0.0 && u <= 1.0) {
-      double intersection_s = bases.at(i - 1) + t * (bases.at(i) - bases.at(i - 1));
-      if (constraint(intersection_s)) {
-        return intersection_s;
+      double intersection = bases.at(i - 1) + t * (bases.at(i) - bases.at(i - 1));
+      if (constraint(intersection)) {
+        return intersection;
       }
     }
   }
@@ -65,51 +67,25 @@ std::vector<double> crossed_with_constraint_impl(
 {
   using trajectory::detail::to_point;
 
-  std::vector<double> xs;
-  std::vector<double> ys;
+  std::vector<double> intersections;
 
-  for (const auto & point : linestring) {
-    xs.push_back(point.x());
-    ys.push_back(point.y());
+  if (linestrings_start.size() != linestrings_end.size()) {
+    throw std::invalid_argument("linestrings_start and linestrings_end must have the same size");
   }
 
-  Eigen::Vector2d line_start(xs.front(), ys.front());
-  Eigen::Vector2d line_end(xs.back(), ys.back());
-  Eigen::Vector2d line_dir = line_end - line_start;
+  for (size_t i = 0; i < linestrings_start.size(); ++i) {
+    const Eigen::Vector2d & line_start = linestrings_start.at(i);
+    const Eigen::Vector2d & line_end = linestrings_end.at(i);
 
-  for (size_t i = 1; i < bases.size(); ++i) {
-    Eigen::Vector2d p0;
-    Eigen::Vector2d p1;
+    std::optional<double> intersection =
+      crossed_with_constraint_impl(trajectory_compute, bases, line_start, line_end, constraint);
 
-    auto p0_tmp = trajectory_compute(bases.at(i - 1));
-    auto p1_tmp = trajectory_compute(bases.at(i));
-
-    p0 << p0_tmp.x, p0_tmp.y;
-    p1 << p1_tmp.x, p1_tmp.y;
-
-    Eigen::Vector2d segment_dir = p1 - p0;
-
-    double det = segment_dir.x() * line_dir.y() - segment_dir.y() * line_dir.x();
-
-    if (std::abs(det) < 1e-10) {
-      continue;
-    }
-
-    Eigen::Vector2d p0_to_line_start = line_start - p0;
-
-    double t = (p0_to_line_start.x() * line_dir.y() - p0_to_line_start.y() * line_dir.x()) / det;
-    double u =
-      (p0_to_line_start.x() * segment_dir.y() - p0_to_line_start.y() * segment_dir.x()) / det;
-
-    if (t >= 0.0 && t <= 1.0 && u >= 0.0 && u <= 1.0) {
-      double intersection_s = bases.at(i - 1) + t * (bases.at(i) - bases.at(i - 1));
-      if (constraint(trajectory.compute(intersection_s))) {
-        return {intersection_s};
-      }
+    if (intersection) {
+      intersections.push_back(*intersection);
     }
   }
 
-  return {};
+  return intersections;
 }
 
 }  // namespace autoware::trajectory::detail::impl

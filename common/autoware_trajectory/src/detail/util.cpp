@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "autoware/trajectory/detail/utils.hpp"
+#include "autoware/trajectory/detail/helpers.hpp"
 
 #include <algorithm>
 #include <vector>
 
 namespace autoware::trajectory::detail
 {
+inline namespace helpers
 
+{
 std::vector<double> fill_bases(const std::vector<double> & x, const size_t & min_points)
 {
   const auto original_size = x.size();
@@ -78,5 +80,5 @@ std::vector<double> crop_bases(
 
   return result;
 }
-
+}  // namespace helpers
 }  // namespace autoware::trajectory::detail

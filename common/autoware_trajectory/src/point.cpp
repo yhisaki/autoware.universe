@@ -14,7 +14,7 @@
 
 #include "autoware/trajectory/point.hpp"
 
-#include "autoware/trajectory/detail/utils.hpp"
+#include "autoware/trajectory/detail/helpers.hpp"
 #include "autoware/trajectory/interpolator/cubic_spline.hpp"
 #include "autoware/trajectory/interpolator/linear.hpp"
 

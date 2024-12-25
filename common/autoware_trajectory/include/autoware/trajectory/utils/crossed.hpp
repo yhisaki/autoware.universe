@@ -81,7 +81,9 @@ namespace detail::impl
 {
 std::vector<double> crossed_with_constraint_impl(
   const std::function<Eigen::Vector2d(const double & s)> & trajectory_compute,
-  const std::vector<double> & bases, const std::vector<Eigen::Vector2d> & linestring,
+  const std::vector<double> & bases,  //
+  const std::vector<Eigen::Vector2d> & linestrings_start,
+  const std::vector<Eigen::Vector2d> & linestrings_end,
   const std::function<bool(const double &)> & constraint);
 }  // namespace detail::impl
 
@@ -90,62 +92,35 @@ template <class TrajectoryPointType, class LineStringType>
   const trajectory::Trajectory<TrajectoryPointType> & trajectory, const LineStringType & linestring,
   const std::function<bool(const TrajectoryPointType &)> & constraint)
 {
-  using trajectory::detail::to_point;
+  using autoware::trajectory::detail::to_point;
 
-  std::vector<double> xs;
-  std::vector<double> ys;
+  std::function<Eigen::Vector2d(const double & s)> trajectory_compute =
+    [&trajectory](const double & s) {
+      TrajectoryPointType point = trajectory.compute(s);
+      Eigen::Vector2d result;
+      result << to_point(point).x, to_point(point).y;
+      return result;
+    };
 
-  for (const auto & point : linestring) {
-    xs.push_back(point.x());
-    ys.push_back(point.y());
+  std::vector<Eigen::Vector2d> linestrings_start;
+  std::vector<Eigen::Vector2d> linestrings_end;
+
+  for (size_t i = 1; i < linestring.size(); ++i) {
+    linestrings_start.push_back(
+      Eigen::Vector2d(linestring.at(i - 1).x(), linestring.at(i - 1).y()));
+    linestrings_end.push_back(Eigen::Vector2d(linestring.at(i).x(), linestring.at(i).y()));
   }
 
-  Eigen::Vector2d line_start(xs.front(), ys.front());
-  Eigen::Vector2d line_end(xs.back(), ys.back());
-  Eigen::Vector2d line_dir = line_end - line_start;
-
-  auto bases = trajectory.get_internal_bases();
-
-  for (size_t i = 1; i < bases.size(); ++i) {
-    Eigen::Vector2d p0;
-    Eigen::Vector2d p1;
-
-    auto p0_tmp = trajectory.compute(bases.at(i - 1));
-    auto p1_tmp = trajectory.compute(bases.at(i));
-
-    p0 << p0_tmp.x, p0_tmp.y;
-    p1 << p1_tmp.x, p1_tmp.y;
-
-    Eigen::Vector2d segment_dir = p1 - p0;
-
-    double det = segment_dir.x() * line_dir.y() - segment_dir.y() * line_dir.x();
-
-    if (std::abs(det) < 1e-10) {
-      continue;
-    }
-
-    Eigen::Vector2d p0_to_line_start = line_start - p0;
-
-    double t = (p0_to_line_start.x() * line_dir.y() - p0_to_line_start.y() * line_dir.x()) / det;
-    double u =
-      (p0_to_line_start.x() * segment_dir.y() - p0_to_line_start.y() * segment_dir.x()) / det;
-
-    if (t >= 0.0 && t <= 1.0 && u >= 0.0 && u <= 1.0) {
-      double intersection_s = bases.at(i - 1) + t * (bases.at(i) - bases.at(i - 1));
-      if (constraint(trajectory.compute(intersection_s))) {
-        return {intersection_s};
-      }
-    }
-  }
-
-  return {};
+  return detail::impl::crossed_with_constraint_impl(
+    trajectory_compute, trajectory.get_internal_bases(), linestrings_start, linestrings_end,
+    constraint);
 }
 
 template <class TrajectoryPointType, class LineStringType>
 [[nodiscard]] std::vector<double> crossed(
   const trajectory::Trajectory<TrajectoryPointType> & trajectory, const LineStringType & linestring)
 {
-  BOOST_CONCEPT_ASSERT((detail::concept ::XYContainerConcept<LineStringType>));
+  // BOOST_CONCEPT_ASSERT((detail::concept ::XYContainerConcept<LineStringType>));
   return crossed_with_constraint(
     trajectory, linestring, [](const TrajectoryPointType &) { return true; });
 }

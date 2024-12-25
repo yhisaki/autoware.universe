@@ -14,7 +14,7 @@
 
 #include "autoware/trajectory/path_point_with_lane_id.hpp"
 
-#include "autoware/trajectory/detail/utils.hpp"
+#include "autoware/trajectory/detail/helpers.hpp"
 #include "autoware/trajectory/interpolator/stairstep.hpp"
 
 #include <memory>
