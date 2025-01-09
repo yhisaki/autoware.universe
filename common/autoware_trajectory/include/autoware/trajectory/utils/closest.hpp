@@ -34,29 +34,29 @@ std::optional<double> closest_with_constraint_impl(
   const std::function<bool(const double &)> & constraint);
 }  // namespace detail::impl
 
-template <class TrajectoryPointType, class ArgPointType>
+template <class TrajectoryPointType, class ArgPointType, class Constraint>
 std::optional<double> closest_with_constraint(
   const trajectory::Trajectory<TrajectoryPointType> & trajectory, const ArgPointType & point,
-  const std::function<bool(const TrajectoryPointType &)> & constraint)
+  const Constraint & constraint)
 {
   using autoware::trajectory::detail::to_point;
-  std::function<Eigen::Vector2d(const double & s)> trajectory_compute =
+
+  return detail::impl::closest_with_constraint_impl(
     [&trajectory](const double & s) {
       TrajectoryPointType point = trajectory.compute(s);
       Eigen::Vector2d result;
       result << to_point(point).x, to_point(point).y;
       return result;
-    };
-  Eigen::Vector2d p(to_point(point).x, to_point(point).y);
-  return detail::impl::closest_with_constraint_impl(
-    trajectory_compute, trajectory.get_internal_bases(), p, constraint);
+    },
+    trajectory.get_internal_bases(), {to_point(point).x, to_point(point).y},
+    [&constraint, &trajectory](const double & s) { return constraint(trajectory.compute(s)); });
 }
 
 template <class TrajectoryPointType, class ArgPointType>
 double closest(
   const trajectory::Trajectory<TrajectoryPointType> & trajectory, const ArgPointType & point)
 {
-  return closest_with_constraint(
+  return *closest_with_constraint(
     trajectory, point, [](const TrajectoryPointType &) { return true; });
 }
 }  // namespace autoware::trajectory

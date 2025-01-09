@@ -61,21 +61,16 @@ std::optional<double> crossed_with_constraint_impl(
 std::vector<double> crossed_with_constraint_impl(
   const std::function<Eigen::Vector2d(const double & s)> & trajectory_compute,
   const std::vector<double> & bases,  //
-  const std::vector<Eigen::Vector2d> & linestrings_start,
-  const std::vector<Eigen::Vector2d> & linestrings_end,
+  const std::vector<std::pair<Eigen::Vector2d, Eigen::Vector2d>> & linestring,
   const std::function<bool(const double &)> & constraint)
 {
   using trajectory::detail::to_point;
 
   std::vector<double> intersections;
 
-  if (linestrings_start.size() != linestrings_end.size()) {
-    throw std::invalid_argument("linestrings_start and linestrings_end must have the same size");
-  }
-
-  for (size_t i = 0; i < linestrings_start.size(); ++i) {
-    const Eigen::Vector2d & line_start = linestrings_start.at(i);
-    const Eigen::Vector2d & line_end = linestrings_end.at(i);
+  for (const auto & line : linestring) {
+    const Eigen::Vector2d & line_start = line.first;
+    const Eigen::Vector2d & line_end = line.second;
 
     std::optional<double> intersection =
       crossed_with_constraint_impl(trajectory_compute, bases, line_start, line_end, constraint);

@@ -45,6 +45,7 @@ bool Trajectory<PointType>::build(const std::vector<PointType> & points)
   std::vector<double> ys;
   std::vector<double> zs;
 
+  bases_.clear();
   bases_.emplace_back(0.0);
   xs.emplace_back(points[0].x);
   ys.emplace_back(points[0].y);
@@ -154,26 +155,5 @@ void Trajectory<PointType>::crop(const double & start, const double & length)
   start_ = std::clamp(start_ + start, start_, end_);
   end_ = std::clamp(start_ + length, start_, end_);
 }
-
-// std::vector<std::pair<double, double>> Trajectory<PointType>::get_segments(
-//   const ConstraintFunction & constraints) const
-// {
-//   std::vector<std::pair<double, double>> segments;
-//   auto bases = get_internal_bases();
-//   bool segment_start = false;
-//   for (const double & s : bases) {
-//     if (constraints(s)) {
-//       if (!segment_start) {
-//         segments.emplace_back(s, s);
-//         segment_start = true;
-//       } else {
-//         segments.back().second = s;
-//       }
-//     } else {
-//       segment_start = false;
-//     }
-//   }
-//   return segments;
-// }
 
 }  // namespace autoware::trajectory

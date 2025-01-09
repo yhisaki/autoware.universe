@@ -36,23 +36,6 @@ struct MutablePoint2d
 struct MutablePoint3d : MutablePoint2d
 {
   MutablePoint3d(double & x, double & y, double & z) : MutablePoint2d{x, y}, z(z) {}
-
-  explicit MutablePoint3d(geometry_msgs::msg::Point & p) : MutablePoint2d{p.x, p.y}, z(p.z) {}
-
-  explicit MutablePoint3d(geometry_msgs::msg::Pose & p)
-  : MutablePoint2d{p.position.x, p.position.y}, z(p.position.z)
-  {
-  }
-  explicit MutablePoint3d(autoware_planning_msgs::msg::PathPoint & p)
-  : MutablePoint2d{p.pose.position.x, p.pose.position.y}, z(p.pose.position.z)
-  {
-  }
-
-  explicit MutablePoint3d(tier4_planning_msgs::msg::PathPointWithLaneId & p)
-  : MutablePoint2d{p.point.pose.position.x, p.point.pose.position.y}, z(p.point.pose.position.z)
-  {
-  }
-
   double & z;
 };
 

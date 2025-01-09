@@ -21,13 +21,15 @@
 #include <tier4_planning_msgs/msg/path_point_with_lane_id.hpp>
 
 #include <lanelet2_core/LaneletMap.h>
+#include <lanelet2_core/primitives/Lanelet.h>
 
 #include <optional>
-#include <set>
 #include <vector>
 
 namespace autoware::behavior_path_planner
 {
+
+
 
 BidirectionalTrafficModule::BidirectionalTrafficModule(
   std::string_view name, rclcpp::Node & node,
@@ -50,22 +52,29 @@ BehaviorModuleOutput BidirectionalTrafficModule::plan()
 {
   using tier4_planning_msgs::msg::PathWithLaneId;
 
-  PathWithLaneId previous_path = getPreviousModuleOutput().path;
+  BehaviorModuleOutput module_output = getPreviousModuleOutput();
+
+  PathWithLaneId previous_path = module_output.path;
+
   auto trajectory =
     trajectory::Trajectory<tier4_planning_msgs::msg::PathPointWithLaneId>::Builder{}.build(
       previous_path.points);
+
   if (!trajectory) {
-    RCLCPP_ERROR(getLogger(), "Failed to build trajectory");
-    return getPreviousModuleOutput();
+    RCLCPP_ERROR(getLogger(), "Failed to build trajectory in BidirectionalTrafficModule::plan");
+    return module_output;
   }
 
-  // std::optional<double> s = trajectory->find_point(
-  //   [](const PathPointWithLaneId & point) { return point.lane_ids == std::vector({1L}); });
-  // std::optional<double> s = trajectory::find_point(
-  //   trajectory,
-  //   [](const PathPointWithLaneId & point) { return point.lane_ids == std::vector({1L}); });
+  if (bidirectional_lane_intervals_in_trajectory_.empty()) {
+    return module_output;
+  }
 
-  return getPreviousModuleOutput();
+  *trajectory = shift_trajectory_for_keep_left(
+    *trajectory, bidirectional_lane_intervals_in_trajectory_, -0.15, 10.0, 10.0);
+
+  module_output.path.points = trajectory->restore();
+
+  return module_output;
 }
 
 BehaviorModuleOutput BidirectionalTrafficModule::planWaitingApproval()
@@ -103,30 +112,26 @@ void BidirectionalTrafficModule::updateData()
   }
 
   PathWithLaneId previous_path = getPreviousModuleOutput().path;
+
   auto trajectory =
     trajectory::Trajectory<tier4_planning_msgs::msg::PathPointWithLaneId>::Builder{}.build(
       previous_path.points);
 
   if (!trajectory) {
-    RCLCPP_ERROR(getLogger(), "Failed to build trajectory");
+    RCLCPP_ERROR(
+      getLogger(), "Failed to build trajectory in BidirectionalTrafficModule::updateData");
     return;
   }
 
-  std::set<int64_t> bidirectional_lane_ids_flatten;
-  for (const auto & lane_pair : bidirectional_lanes_) {
-    bidirectional_lane_ids_flatten.insert(lane_pair.first.id());
-    bidirectional_lane_ids_flatten.insert(lane_pair.second.id());
-  }
+  bidirectional_lane_intervals_in_trajectory_ = trajectory::find_intervals(
+    *trajectory, [&](const tier4_planning_msgs::msg::PathPointWithLaneId & point) {
+      return bidirectional_lanes_.is_bidirectional_lanes(point.lane_ids);
+    });
 
-  bidirectional_lane_intervals_in_trajectory_ = trajectory->get_segments([&](double s) {
-    auto point = trajectory->compute(s);
-    for (const auto & lane_id : point.lane_ids) {
-      if (bidirectional_lane_ids_flatten.find(lane_id) != bidirectional_lane_ids_flatten.end()) {
-        return true;
-      }
-    }
-    return false;
-  });
+  // auto objects = planner_data_->dynamic_object->objects;
+  // for (const auto & object : objects) {
+  //   object.kinematics.predicted_paths;
+  // }
 }
 
 void BidirectionalTrafficModule::acceptVisitor(

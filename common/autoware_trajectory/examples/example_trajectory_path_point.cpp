@@ -19,6 +19,9 @@
 #include <autoware_planning_msgs/msg/path_point.hpp>
 #include <geometry_msgs/msg/point.hpp>
 
+#include <boost/geometry/geometries/linestring.hpp>
+
+#include <Eigen/src/Core/Matrix.h>
 #include <matplotlibcpp17/pyplot.h>
 
 #include <iostream>
@@ -71,25 +74,17 @@ int main()
 
   trajectory->align_orientation_with_trajectory_direction();
 
-  geometry_msgs::msg::Point p1;
-  geometry_msgs::msg::Point p2;
-  p1.x = 7.5;
-  p1.y = 8.6;
-  p2.x = 10.2;
-  p2.y = 7.7;
-
   lanelet::LineString2d line_string;
-
-  for (const auto & p : line_string) {
-    lanelet::BasicPoint2d point(p.x(), p.y());
-    // line_string.push_back(point);
-  }
+  line_string.push_back(lanelet::Point3d(lanelet::InvalId, 7.5, 8.6, 0.0));
+  line_string.push_back(lanelet::Point3d(lanelet::InvalId, 10.2, 7.7, 0.0));
 
   auto s = autoware::trajectory::crossed(*trajectory, line_string);
   auto crossed = trajectory->compute(s.at(0));
 
   plt.plot(
-    Args(std::vector<double>{p1.x, p2.x}, std::vector<double>{p1.y, p2.y}),
+    Args(
+      std::vector<double>{line_string[0].x(), line_string[1].x()},
+      std::vector<double>{line_string[0].y(), line_string[1].y()}),
     Kwargs("color"_a = "purple"));
 
   plt.scatter(

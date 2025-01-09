@@ -4,7 +4,12 @@ project(autoware_trajectory)
 
 option(BUILD_EXAMPLES "Build examples" ON)
 
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--as-needed")
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--as-needed")
+set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--as-needed")
+
 find_package(autoware_cmake REQUIRED)
+
 autoware_package()
 
 ament_auto_add_library(autoware_trajectory SHARED

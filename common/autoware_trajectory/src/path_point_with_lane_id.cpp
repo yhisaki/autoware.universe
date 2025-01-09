@@ -26,15 +26,10 @@ namespace autoware::trajectory
 using PointType = tier4_planning_msgs::msg::PathPointWithLaneId;
 
 Trajectory<PointType>::Trajectory()
-: lane_ids_(std::make_shared<detail::InterpolatedArray<LaneIdType>>(
-    std::make_shared<interpolator::Stairstep<LaneIdType>>()))
+: lane_ids_(
+    std::make_shared<detail::InterpolatedArray<LaneIdType>>(
+      std::make_shared<interpolator::Stairstep<LaneIdType>>()))
 {
-}
-
-Trajectory<PointType>::Trajectory(const Trajectory & rhs)
-: Trajectory<autoware_planning_msgs::msg::PathPoint>(rhs)
-{
-  lane_ids_ = std::make_shared<detail::InterpolatedArray<LaneIdType>>(this->lane_ids());
 }
 
 Trajectory<PointType> & Trajectory<PointType>::operator=(const Trajectory & rhs)

@@ -96,7 +96,11 @@ void Trajectory<PointType>::align_orientation_with_trajectory_direction()
 
     aligned_orientations.emplace_back(aligned_orientation);
   }
-  orientation_interpolator_->build(bases_, aligned_orientations);
+  bool success = orientation_interpolator_->build(bases_, aligned_orientations);
+  if (!success) {
+    throw std::runtime_error(
+      "Failed to build orientation interpolator.");  // This Exception should not be thrown.
+  }
 }
 
 std::vector<PointType> Trajectory<PointType>::restore(const size_t & min_points) const

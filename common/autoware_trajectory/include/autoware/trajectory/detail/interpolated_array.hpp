@@ -17,6 +17,7 @@
 #define AUTOWARE__TRAJECTORY__DETAIL__INTERPOLATED_ARRAY_HPP_  // NOLINT
 // clang-format on
 
+#include "autoware/trajectory/detail/logging.hpp"
 #include "autoware/trajectory/interpolator/interpolator.hpp"
 
 #include <Eigen/Core>
@@ -130,7 +131,11 @@ public:
       // Set the values in the specified range
       std::fill(values.begin() + start_index, values.begin() + end_index + 1, value);
 
-      parent_.interpolator_->build(bases, values);
+      bool success = parent_.interpolator_->build(bases, values);
+      if (!success) {
+        throw std::runtime_error(
+          "Failed to build interpolator.");  // This Exception should not be thrown.
+      }
     }
   };
 
@@ -144,9 +149,8 @@ public:
   {
     if (start < this->start() || end > this->end()) {
       RCLCPP_WARN(
-        rclcpp::get_logger("InterpolatedArray"),
-        "The range [%f, %f] is out of the array range [%f, %f]", start, end, this->start(),
-        this->end());
+        get_logger(), "The range [%f, %f] is out of the array range [%f, %f]", start, end,
+        this->start(), this->end());
       start = std::max(start, this->start());
       end = std::min(end, this->end());
     }
@@ -161,7 +165,11 @@ public:
   InterpolatedArray & operator=(const T & value)
   {
     std::fill(values_.begin(), values_.end(), value);
-    interpolator_->build(bases_, values_);
+    bool success = interpolator_->build(bases_, values_);
+    if (!success) {
+      throw std::runtime_error(
+        "Failed to build interpolator.");  // This Exception should not be thrown.
+    }
     return *this;
   }
 

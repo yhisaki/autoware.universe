@@ -106,20 +106,6 @@ public:
    */
   [[nodiscard]] double curvature(double s) const;
 
-  // /**
-  //  * @brief Find the point where Trajectory and line cross.
-  //  * @tparam InputPointType Type of input point
-  //  * @param start Start point of the line
-  //  * @param end End point of the line
-  //  * @return Optional arc length of the crossing point
-  //  */
-  // template <typename InputPointType>
-  // [[nodiscard]] std::optional<double> crossed(
-  //   const InputPointType & start, const InputPointType & end) const
-  // {
-  //   return crossed_with_constraint(start, end, [](const double &) { return true; });
-  // }
-
   /**
    * @brief Restore the trajectory points
    * @param min_points Minimum number of points
@@ -128,21 +114,6 @@ public:
   [[nodiscard]] std::vector<PointType> restore(const size_t & min_points = 4) const;
 
   void crop(const double & start, const double & length);
-
-  // /**
-  //  * @brief Extracts segments from the trajectory based on the given constraints.
-  //  *
-  //  * This function iterates through the internal bases of the trajectory and applies the provided
-  //  * constraint function to determine valid segments. A segment is defined as a continuous range
-  //  * of points that satisfy the constraint function.
-  //  *
-  //  * @param constraints A function that takes a double value and returns a boolean indicating
-  //  *                    whether the value satisfies the constraints.
-  //  * @return A vector of pairs, where each pair represents the start and end points of a segment
-  //  *         that satisfies the constraints.
-  //  */
-  // [[nodiscard]] std::vector<std::pair<double, double>> get_segments(
-  //   const ConstraintFunction & constraints) const;
 
   class Builder
   {

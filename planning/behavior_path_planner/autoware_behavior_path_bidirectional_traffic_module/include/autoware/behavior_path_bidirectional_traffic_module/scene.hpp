@@ -17,8 +17,10 @@
 
 #include "autoware/behavior_path_bidirectional_traffic_module/utils.hpp"
 #include "autoware/behavior_path_planner_common/interface/scene_module_interface.hpp"
+#include "autoware/trajectory/utils/find_intervals.hpp"
 
 #include <string_view>
+#include <vector>
 
 namespace autoware::behavior_path_planner
 {
@@ -51,9 +53,9 @@ private:
 
   BidirectionalLanes bidirectional_lanes_;  //!< bidirectional lane pairs in the map
 
-  std::vector<std::pair<double, double>>
-    bidirectional_lane_intervals_in_trajectory_;  //!< bidirectional lane intervals in the
-                                                  //!< trajectory
+  std::vector<trajectory::Interval>
+    bidirectional_lane_intervals_in_trajectory_;  //!< bidirectional lane
+                                                  //!< intervals in the trajectory
 };
 
 }  // namespace autoware::behavior_path_planner

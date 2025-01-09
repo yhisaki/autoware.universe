@@ -38,7 +38,7 @@ class Trajectory<tier4_planning_msgs::msg::PathPointWithLaneId>
 public:
   Trajectory();
   ~Trajectory() override = default;
-  Trajectory(const Trajectory & rhs);
+  Trajectory(const Trajectory & rhs) = default;
   Trajectory(Trajectory && rhs) = default;
   Trajectory & operator=(const Trajectory & rhs);
   Trajectory & operator=(Trajectory && rhs) = default;
@@ -46,7 +46,7 @@ public:
   detail::InterpolatedArray<LaneIdType> & lane_ids()
   {
     if (lane_ids_.use_count() > 1) {
-      lane_ids_ = std::make_shared<detail::InterpolatedArray<LaneIdType>>(this->lane_ids());
+      lane_ids_ = std::make_shared<detail::InterpolatedArray<LaneIdType>>(*lane_ids_);
     }
     return *lane_ids_;
   }

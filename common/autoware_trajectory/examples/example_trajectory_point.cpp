@@ -16,6 +16,7 @@
 #include "autoware/trajectory/point.hpp"
 #include "autoware/trajectory/utils/closest.hpp"
 #include "autoware/trajectory/utils/crossed.hpp"
+#include "lanelet2_core/primitives/LineString.h"
 
 #include <geometry_msgs/msg/point.hpp>
 
@@ -100,25 +101,28 @@ int main()
       Args(std::vector<double>{p.x, closest.x}, std::vector<double>{p.y, closest.y}),
       Kwargs("color"_a = "green"));
   }
-  // {
-  //   geometry_msgs::msg::Point p1;
-  //   geometry_msgs::msg::Point p2;
-  //   p1.x = 6.97;
-  //   p1.y = 6.36;
-  //   p2.x = 9.23;
-  //   p2.y = 5.92;
+  {
+    lanelet::LineString2d line_string;
+    line_string.push_back(lanelet::Point3d(lanelet::InvalId, 6.97, 6.36, 0.0));
+    line_string.push_back(lanelet::Point3d(lanelet::InvalId, 9.23, 5.92, 0.0));
 
-  //   auto s = trajectory->crossed(p1, p2);
-  //   auto crossed = trajectory->compute(s.value());
+    auto s = autoware::trajectory::crossed(*trajectory, line_string);
+    if (s.empty()) {
+      std::cerr << "Failed to find a crossing point" << std::endl;
+      return 1;
+    }
+    auto crossed = trajectory->compute(s.at(0));
 
-  //   plt.plot(
-  //     Args(std::vector<double>{p1.x, p2.x}, std::vector<double>{p1.y, p2.y}),
-  //     Kwargs("color"_a = "purple"));
+    plt.plot(
+      Args(
+        std::vector<double>{line_string[0].x(), line_string[1].x()},
+        std::vector<double>{line_string[0].y(), line_string[1].y()}),
+      Kwargs("color"_a = "purple"));
 
-  //   plt.scatter(
-  //     Args(crossed.x, crossed.y),
-  //     Kwargs("label"_a = "Crossed on trajectory", "color"_a = "purple"));
-  // }
+    plt.scatter(
+      Args(crossed.x, crossed.y),
+      Kwargs("label"_a = "Crossed on trajectory", "color"_a = "purple"));
+  }
   {
     auto restored = trajectory->restore(50);
     std::vector<double> x;

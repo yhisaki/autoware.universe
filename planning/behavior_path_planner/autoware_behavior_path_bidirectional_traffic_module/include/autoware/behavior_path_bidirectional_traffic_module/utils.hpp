@@ -15,21 +15,40 @@
 #ifndef AUTOWARE__BEHAVIOR_PATH_BIDIRECTIONAL_TRAFFIC_MODULE__UTILS_HPP_
 #define AUTOWARE__BEHAVIOR_PATH_BIDIRECTIONAL_TRAFFIC_MODULE__UTILS_HPP_
 
+#include <autoware/trajectory/forward.hpp>
+#include <autoware/trajectory/utils/find_intervals.hpp>
+
+#include <tier4_planning_msgs/msg/path_point_with_lane_id.hpp>
+
 #include <lanelet2_core/Forward.h>
 
+#include <unordered_set>
 #include <vector>
-
 namespace autoware::behavior_path_planner
 {
 
-using BidirectionalLanePair = std::pair<lanelet::ConstLanelet, lanelet::ConstLanelet>;
-using BidirectionalLanes = std::vector<BidirectionalLanePair>;
+class BidirectionalLanes
+{
+  std::vector<std::pair<lanelet::ConstLanelet, lanelet::ConstLanelet>> bidirectional_lanes_;
+  std::unordered_set<lanelet::Id> all_ids_set_;
 
-bool is_bidirectional_traffic(
+public:
+  void add(const lanelet::ConstLanelet & lanelet_a, const lanelet::ConstLanelet & lanelet_b);
+  [[nodiscard]] bool is_bidirectional_lanes(const lanelet::Ids & lane_ids) const;
+};
+
+bool is_bidirectional_lanes(
   const lanelet::ConstLanelet & lanelet_a, const lanelet::ConstLanelet & lanelet_b);
 
 BidirectionalLanes search_bidirectional_lane_from_map(const lanelet::LaneletMap & map);
 
+trajectory::Trajectory<tier4_planning_msgs::msg::PathPointWithLaneId>
+shift_trajectory_for_keep_left(
+  const trajectory::Trajectory<tier4_planning_msgs::msg::PathPointWithLaneId> & trajectory,
+  const std::vector<trajectory::Interval> bidirectional_lane_intervals_in_trajectory,
+  const double & keep_left_length_from_center,
+  const double & distance_to_shift_for_enter_bidirectional_lane,
+  const double & distance_to_shift_for_exit_bidirectional_lane);
 }  // namespace autoware::behavior_path_planner
 
 #endif  // AUTOWARE__BEHAVIOR_PATH_BIDIRECTIONAL_TRAFFIC_MODULE__UTILS_HPP_
